@@ -4,8 +4,13 @@ import { supabaseAdmin } from "@/lib/supabase";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function getAdmin() {
+  if (!supabaseAdmin) throw new Error("Supabase admin not configured");
+  return supabaseAdmin;
+}
+
 export async function GET() {
-  const { data: articles, error } = await supabaseAdmin
+  const { data: articles, error } = await getAdmin()
     .from("articles")
     .select("slug")
     .eq("status", "scheduled")
@@ -21,7 +26,7 @@ export async function GET() {
 
   const slugs = articles.map((a) => a.slug);
 
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await getAdmin()
     .from("articles")
     .update({ status: "published" })
     .in("slug", slugs);
