@@ -4,9 +4,8 @@ import { siteUrl } from "@/lib/site";
 
 export const revalidate = 3600;
 
-const baseUrl = siteUrl();
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = siteUrl();
   let slugs: string[] = [];
   let categorySlugs: string[] = [];
   let tagSlugs: string[] = [];

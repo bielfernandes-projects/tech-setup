@@ -13,6 +13,7 @@ export const site = {
 } as const;
 
 export function siteUrl(path: string = ""): string {
+  if (!path) return site.url;
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return `${site.url}${normalized}`;
 }
