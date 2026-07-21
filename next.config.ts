@@ -1,7 +1,5 @@
 import type { NextConfig } from "next";
 
-const baseUrl = "https://tech-setup.vercel.app";
-
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",

@@ -1,14 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getArticlesByTag, getTagBySlug, getAllTagSlugs } from "@/lib/mdx";
-
-const siteUrl = "https://tech-setup.vercel.app";
+import { articleRepository } from "@/lib/articles";
+import { site, siteUrl } from "@/lib/site";
 
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const slugs = await getAllTagSlugs();
+  const slugs = await articleRepository.listTagSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
@@ -18,14 +17,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const tag = await getTagBySlug(slug);
+  const tag = await articleRepository.findTagBySlug(slug);
   if (!tag) return { title: "Not Found" };
 
   return {
     title: `#${tag.name} — Developer Articles`,
     description: `Browse articles tagged with ${tag.name} — practical developer guides and tutorials.`,
     alternates: {
-      canonical: `${siteUrl}/blog/tag/${slug}`,
+      canonical: siteUrl(`/blog/tag/${slug}`),
     },
   };
 }
@@ -36,17 +35,17 @@ export default async function TagPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const tag = await getTagBySlug(slug);
+  const tag = await articleRepository.findTagBySlug(slug);
   if (!tag) notFound();
 
-  const articles = await getArticlesByTag(slug);
+  const articles = await articleRepository.findByTag(slug);
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: `#${tag.name} Articles`,
     description: `Articles tagged with ${tag.name}`,
-    url: `${siteUrl}/blog/tag/${slug}`,
+    url: siteUrl(`/blog/tag/${slug}`),
     ...(articles.length > 0 && {
       mainEntity: {
         "@type": "ItemList",
@@ -55,7 +54,7 @@ export default async function TagPage({
         itemListElement: articles.map((article, i) => ({
           "@type": "ListItem",
           position: i + 1,
-          url: `${siteUrl}/blog/${article.slug}`,
+          url: siteUrl(`/blog/${article.slug}`),
           name: article.title,
         })),
       },
@@ -66,9 +65,9 @@ export default async function TagPage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
-      { "@type": "ListItem", position: 3, name: `#${tag.name}`, item: `${siteUrl}/blog/tag/${slug}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl() },
+      { "@type": "ListItem", position: 2, name: "Blog", item: siteUrl("/blog") },
+      { "@type": "ListItem", position: 3, name: `#${tag.name}`, item: siteUrl(`/blog/tag/${slug}`) },
     ],
   };
 

@@ -72,7 +72,7 @@
 | `/sitemap.xml` | Dynamic | Generated from DB (articles + categories + tags + static pages) |
 | `/robots.txt` | Static | Generated from code (hardcoded domain) |
 | `/api/revalidate` | POST | On-demand ISR (secret protected) |
-| `/api/cron/publish` | GET | Vercel cron — published scheduled articles |
+| `/api/cron/publish` | GET | Vercel cron — publica artigos agendados. Requer `CRON_SECRET` no header `Authorization` |
 | not-found | Static | 404 page |
 
 ## Layout
@@ -128,8 +128,12 @@ src/
 │   ├── robots.ts
 │   └── sitemap.ts
 ├── lib/
-│   ├── mdx.ts
+│   ├── articles/
+│   │   ├── repository.ts       # ArticleRepository interface
+│   │   ├── supabase-adapter.ts # Supabase implementation
+│   │   └── index.ts            # exports
 │   ├── markdown-content.tsx
+│   ├── site.ts                 # single source of truth: name, url, helpers
 │   ├── supabase.ts
 │   └── types.ts
 supabase/
@@ -142,6 +146,21 @@ scripts/
 ├── schedule-articles.ts
 └── topics.json
 ```
+
+## Arquitetura
+
+### Repository Pattern
+
+- `src/lib/articles/repository.ts` define a interface `ArticleRepository` — a única superfície que as páginas conhecem.
+- `src/lib/articles/supabase-adapter.ts` implementa a interface com queries Supabase + normalização.
+- Todas as páginas usam `articleRepository` exportado de `src/lib/articles`. O schema do banco fica isolado no adapter.
+- Antigo `src/lib/mdx.ts` removido (era uma coleção de 12 funções thin wrappers).
+
+### Site Constants
+
+- `src/lib/site.ts` centraliza nome, descrição, URL e helpers (`siteUrl`).
+- Fallback de URL: `process.env.NEXT_PUBLIC_SITE_URL ?? "https://tech-setup.vercel.app"`.
+- Todas as páginas (home, artigos, categorias, tags, about, contact, legal pages) usam `site.name` e `siteUrl()`.
 
 ## Scripts
 
@@ -171,13 +190,17 @@ scripts/
 
 ## Variáveis de Entorno
 
-- `NEXT_PUBLIC_SUPABASE_URL` — set on Vercel (production)
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — set on Vercel (production)
-- `SUPABASE_SERVICE_ROLE_KEY` — set on Vercel (production) + local
-- `REVALIDATE_SECRET` — set on Vercel (production) + local
-- `GEMINI_API_KEY` — local only (scripts)
-- `UNSPLASH_ACCESS_KEY` — local only (scripts)
-- `SUPABASE_URL` — alias for NEXT_PUBLIC_SUPABASE_URL (scripts)
+| Variável | Onde usar | Descrição |
+|----------|-----------|-----------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Vercel + local | URL do projeto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Vercel + local | Anon key pública (somente SELECT em artigos publicados) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Vercel + local | Service role (scripts + cron) — **nunca expor no browser** |
+| `REVALIDATE_SECRET` | Vercel + local | Header secret para `/api/revalidate` |
+| `CRON_SECRET` | Vercel | Header `Authorization: Bearer <token>` enviado pelo Vercel Cron para `/api/cron/publish` |
+| `NEXT_PUBLIC_SITE_URL` | Vercel (opcional) | URL canônica do site; fallback é `https://tech-setup.vercel.app` |
+| `GEMINI_API_KEY` | local only | Geração de artigos |
+| `UNSPLASH_ACCESS_KEY` | local only | Busca de hero images |
+| `SUPABASE_URL` | local only | Alias para `NEXT_PUBLIC_SUPABASE_URL` nos scripts |
 
 ## Clientes CLI
 
@@ -228,11 +251,45 @@ Domínios autorizados em `next.config.ts`:
 
 Pra adicionar domínios: editar `next.config.ts` → `images.remotePatterns`.
 
+## Segurança
+
+### Autenticação de API
+
+- `/api/cron/publish` exige `Authorization: Bearer <CRON_SECRET>` (enviado automaticamente pelo Vercel Cron). Sem o secret, retorna 401.
+- `/api/revalidate` exige `x-revalidate-secret` e valida o `slug` contra regex `/^[a-z0-9-]{1,200}$/`.
+- Mensagens de erro internas do Supabase nunca são expostas em responses HTTP — logadas server-side.
+
+### CSP & Headers
+
+`next.config.ts` adiciona headers globais:
+- `Content-Security-Policy` — default-src 'self', img-src restrito a domínios confiáveis, frame-ancestors 'none'
+- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` (camera/microphone/geolocation desligados)
+- `Strict-Transport-Security` (HSTS)
+
+### Sanitização de Conteúdo
+
+- `MarkdownContent` usa `rehype-sanitize` para limpar HTML cru do conteúdo gerado por IA.
+
+### RLS
+
+- Anon: SELECT only em `articles` com `status='published'`.
+- Categories/tags: SELECT público.
+- Writes: `service_role` only.
+- Storage bucket `hero-images`: public read, service_role write/delete.
+
 ## Pendências
 
 - [x] Configurar REVALIDATE_SECRET na Vercel
+- [x] Configurar CRON_SECRET na Vercel (obrigatório para `/api/cron/publish`)
 - [x] Adicionar SUPABASE_SERVICE_ROLE_KEY na Vercel
 - [x] Test deployment em producao
+- [x] Refatorar repository pattern (`src/lib/articles/`)
+- [x] Centralizar site URL/nome em `src/lib/site.ts`
+- [x] Adicionar CSP e security headers
+- [x] Sanitizar markdown com `rehype-sanitize`
 - [x] Criar script Node.js de geracao de artigos (IA -> Supabase)
 - [x] Criar script de agendamento automatico (schedule-articles.ts)
 - [ ] Popular dados reais (40 artigos) — 19 criados (9 published, 10 scheduled), quota Gemini free = 10/dia

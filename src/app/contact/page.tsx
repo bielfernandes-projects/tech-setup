@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-
-const siteUrl = "https://tech-setup.vercel.app";
+import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
   description: "Get in touch with Tech Setup — questions, corrections, and topic suggestions welcome.",
   alternates: {
-    canonical: `${siteUrl}/contact`,
+    canonical: siteUrl("/contact"),
   },
 };
 

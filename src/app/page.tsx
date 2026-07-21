@@ -1,28 +1,26 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getRecentArticles } from "@/lib/mdx";
+import { articleRepository } from "@/lib/articles";
+import { site, siteUrl } from "@/lib/site";
 
 export const revalidate = 60;
 
-const siteUrl = "https://tech-setup.vercel.app";
-
 export default async function Home() {
-  const articles = await getRecentArticles(20);
+  const articles = await articleRepository.findPublished(20);
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Tech Setup",
-    url: siteUrl,
-    description:
-      "Practical guides for developers — troubleshooting, setup, and tools.",
+    name: site.name,
+    url: siteUrl(),
+    description: site.description,
     publisher: {
       "@type": "Organization",
-      name: "Tech Setup",
-      url: siteUrl,
+      name: site.name,
+      url: siteUrl(),
       logo: {
         "@type": "ImageObject",
-        url: `${siteUrl}/icon.svg`,
+        url: siteUrl(site.icon),
       },
     },
     ...(articles.length > 0 && {
@@ -33,7 +31,7 @@ export default async function Home() {
         itemListElement: articles.map((article, i) => ({
           "@type": "ListItem",
           position: i + 1,
-          url: `${siteUrl}/blog/${article.slug}`,
+          url: siteUrl(`/blog/${article.slug}`),
           name: article.title,
         })),
       },
@@ -50,10 +48,10 @@ export default async function Home() {
       <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
         <header className="mb-12">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
-            Tech Setup
+            {site.name}
           </h1>
           <p className="mt-3 text-lg text-muted max-w-xl">
-            Practical guides for developers — troubleshooting, setup, and tools.
+            {site.description}
           </p>
         </header>
 

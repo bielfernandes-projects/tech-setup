@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-
-const siteUrl = "https://tech-setup.vercel.app";
+import { site, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "About",
   description:
     "About Tech Setup — a curated resource of practical guides for developers, covering troubleshooting, software setup, AI tools, and DevOps.",
   alternates: {
-    canonical: `${siteUrl}/about`,
+    canonical: siteUrl("/about"),
   },
 };
 
@@ -15,12 +14,12 @@ export default function AboutPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "AboutPage",
-    name: "About Tech Setup",
-    url: `${siteUrl}/about`,
+    name: `About ${site.name}`,
+    url: siteUrl("/about"),
     mainEntity: {
       "@type": "Organization",
-      name: "Tech Setup",
-      url: siteUrl,
+      name: site.name,
+      url: siteUrl(),
       description:
         "Tech Setup is an independent publication providing practical guides for developers. We cover troubleshooting, software setup, AI development, Linux, DevOps, and home automation.",
     },

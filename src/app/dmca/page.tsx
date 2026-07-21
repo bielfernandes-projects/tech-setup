@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-
-const siteUrl = "https://tech-setup.vercel.app";
+import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "DMCA Notice",
   description: "Tech Setup DMCA policy — how to report copyright infringement.",
   alternates: {
-    canonical: `${siteUrl}/dmca`,
+    canonical: siteUrl("/dmca"),
   },
 };
 

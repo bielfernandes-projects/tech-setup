@@ -1,13 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getAllPublishedSlugs, getArticleBySlug, getRelatedArticles } from "@/lib/mdx";
+import { articleRepository } from "@/lib/articles";
 import MarkdownContent from "@/lib/markdown-content";
-
-const siteUrl = "https://tech-setup.vercel.app";
+import { site, siteUrl } from "@/lib/site";
 
 export async function generateStaticParams() {
-  const slugs = await getAllPublishedSlugs();
+  const slugs = await articleRepository.listPublishedSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
@@ -17,12 +16,12 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const article = await getArticleBySlug(slug);
+  const article = await articleRepository.findBySlug(slug);
 
   if (!article) return { title: "Not Found" };
 
-  const url = `${siteUrl}/blog/${article.slug}`;
-  const image = article.hero_image_url ?? `${siteUrl}/opengraph-image`;
+  const url = siteUrl(`/blog/${article.slug}`);
+  const image = article.hero_image_url ?? siteUrl(site.ogImage);
 
   return {
     title: article.title,
@@ -63,11 +62,11 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const article = await getArticleBySlug(slug);
+  const article = await articleRepository.findBySlug(slug);
 
   if (!article) notFound();
 
-  const related = await getRelatedArticles(article.id, article.category?.slug ?? null, 3);
+  const related = await articleRepository.findRelated(article.id, article.category?.slug ?? null, 3);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -75,21 +74,21 @@ export default async function ArticlePage({
     headline: article.title,
     description: article.excerpt,
     image: article.hero_image_url ?? `${siteUrl}/opengraph-image`,
-    url: `${siteUrl}/blog/${article.slug}`,
+    url: siteUrl(`/blog/${article.slug}`),
     datePublished: article.published_at ?? article.created_at,
     dateModified: article.updated_at ?? article.published_at ?? article.created_at,
     author: {
       "@type": "Organization",
-      name: "Tech Setup",
-      url: siteUrl,
+      name: site.name,
+      url: siteUrl(),
     },
     publisher: {
       "@type": "Organization",
-      name: "Tech Setup",
-      url: siteUrl,
+      name: site.name,
+      url: siteUrl(),
       logo: {
         "@type": "ImageObject",
-        url: `${siteUrl}/icon.svg`,
+        url: siteUrl(site.icon),
       },
     },
     mainEntityOfPage: {
@@ -108,16 +107,16 @@ export default async function ArticlePage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl() },
+      { "@type": "ListItem", position: 2, name: "Blog", item: siteUrl("/blog") },
       ...(article.category
-        ? [{ "@type": "ListItem", position: 3, name: article.category.name, item: `${siteUrl}/blog/category/${article.category.slug}` }]
+        ? [{ "@type": "ListItem", position: 3, name: article.category.name, item: siteUrl(`/blog/category/${article.category.slug}`) }]
         : []),
       {
         "@type": "ListItem",
         position: article.category ? 4 : 3,
         name: article.title,
-        item: `${siteUrl}/blog/${article.slug}`,
+        item: siteUrl(`/blog/${article.slug}`),
       },
     ],
   };

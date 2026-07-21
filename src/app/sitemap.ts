@@ -1,13 +1,10 @@
 import type { MetadataRoute } from "next";
-import {
-  getAllPublishedSlugs,
-  getAllCategorySlugs,
-  getAllTagSlugs,
-} from "@/lib/mdx";
+import { articleRepository } from "@/lib/articles";
+import { siteUrl } from "@/lib/site";
 
 export const revalidate = 3600;
 
-const baseUrl = "https://tech-setup.vercel.app";
+const baseUrl = siteUrl();
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let slugs: string[] = [];
@@ -15,19 +12,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let tagSlugs: string[] = [];
 
   try {
-    slugs = await getAllPublishedSlugs();
+    slugs = await articleRepository.listPublishedSlugs();
   } catch (e) {
     console.error("[sitemap] Failed to fetch article slugs:", e);
   }
 
   try {
-    categorySlugs = await getAllCategorySlugs();
+    categorySlugs = await articleRepository.listCategorySlugs();
   } catch (e) {
     console.error("[sitemap] Failed to fetch category slugs:", e);
   }
 
   try {
-    tagSlugs = await getAllTagSlugs();
+    tagSlugs = await articleRepository.listTagSlugs();
   } catch (e) {
     console.error("[sitemap] Failed to fetch tag slugs:", e);
   }

@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-
-const siteUrl = "https://tech-setup.vercel.app";
+import { siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "Tech Setup privacy policy — how we collect, use, and protect your data.",
   alternates: {
-    canonical: `${siteUrl}/privacy-policy`,
+    canonical: siteUrl("/privacy-policy"),
   },
 };
 

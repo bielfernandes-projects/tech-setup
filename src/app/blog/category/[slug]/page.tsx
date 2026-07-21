@@ -1,14 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getArticlesByCategory, getCategoryBySlug, getAllCategorySlugs } from "@/lib/mdx";
-
-const siteUrl = "https://tech-setup.vercel.app";
+import { articleRepository } from "@/lib/articles";
+import { site, siteUrl } from "@/lib/site";
 
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const slugs = await getAllCategorySlugs();
+  const slugs = await articleRepository.listCategorySlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
@@ -18,14 +17,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const category = await getCategoryBySlug(slug);
+  const category = await articleRepository.findCategoryBySlug(slug);
   if (!category) return { title: "Not Found" };
 
   return {
     title: `${category.name} — Developer Guides & Tutorials`,
     description: `Browse our latest ${category.name} articles — practical guides, tutorials, and troubleshooting tips for developers.`,
     alternates: {
-      canonical: `${siteUrl}/blog/category/${slug}`,
+      canonical: siteUrl(`/blog/category/${slug}`),
     },
   };
 }
@@ -47,10 +46,10 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const category = await getCategoryBySlug(slug);
+  const category = await articleRepository.findCategoryBySlug(slug);
   if (!category) notFound();
 
-  const articles = await getArticlesByCategory(slug);
+  const articles = await articleRepository.findByCategory(slug);
   const description = categoryDescriptions[slug] ?? `Explore our ${category.name} articles for developers.`;
 
   const jsonLd = {
@@ -58,11 +57,11 @@ export default async function CategoryPage({
     "@type": "CollectionPage",
     name: `${category.name} — Developer Guides`,
     description,
-    url: `${siteUrl}/blog/category/${slug}`,
+    url: siteUrl(`/blog/category/${slug}`),
     isPartOf: {
       "@type": "WebSite",
-      name: "Tech Setup",
-      url: siteUrl,
+      name: site.name,
+      url: siteUrl(),
     },
     ...(articles.length > 0 && {
       mainEntity: {
@@ -72,7 +71,7 @@ export default async function CategoryPage({
         itemListElement: articles.map((article, i) => ({
           "@type": "ListItem",
           position: i + 1,
-          url: `${siteUrl}/blog/${article.slug}`,
+          url: siteUrl(`/blog/${article.slug}`),
           name: article.title,
         })),
       },
@@ -83,9 +82,9 @@ export default async function CategoryPage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
-      { "@type": "ListItem", position: 3, name: category.name, item: `${siteUrl}/blog/category/${slug}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl() },
+      { "@type": "ListItem", position: 2, name: "Blog", item: siteUrl("/blog") },
+      { "@type": "ListItem", position: 3, name: category.name, item: siteUrl(`/blog/category/${slug}`) },
     ],
   };
 
