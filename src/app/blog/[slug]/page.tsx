@@ -26,7 +26,7 @@ export async function generateMetadata({
       title: article.title,
       description: article.excerpt ?? article.title,
       type: "article",
-      publishedTime: article.published_at,
+      publishedTime: article.published_at ?? undefined,
     },
   };
 }
@@ -65,10 +65,10 @@ export default async function ArticlePage({
           {article.title}
         </h1>
         <time
-          dateTime={article.published_at}
+          dateTime={article.published_at ?? undefined}
           className="mt-3 block text-sm text-muted"
         >
-          {new Date(article.published_at).toLocaleDateString("en-US", {
+          {new Date(article.published_at ?? article.created_at ?? Date.now()).toLocaleDateString("en-US", {
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -124,8 +124,8 @@ export default async function ArticlePage({
             {related.map((rel) => (
               <article key={rel.slug}>
                 <div className="flex items-center gap-2 text-sm text-muted mb-1">
-                  <time dateTime={rel.published_at}>
-                    {new Date(rel.published_at).toLocaleDateString("en-US", {
+                  <time dateTime={rel.published_at ?? undefined}>
+                    {new Date(rel.published_at ?? rel.created_at ?? Date.now()).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
                     })}

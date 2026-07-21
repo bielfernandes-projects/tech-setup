@@ -25,10 +25,11 @@ export async function GET() {
   }
 
   const slugs = articles.map((a) => a.slug);
+  const now = new Date().toISOString();
 
   const { error: updateError } = await getAdmin()
     .from("articles")
-    .update({ status: "published" })
+    .update({ status: "published", published_at: now })
     .in("slug", slugs);
 
   if (updateError) {

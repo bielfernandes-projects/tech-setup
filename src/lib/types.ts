@@ -5,7 +5,7 @@ export interface Article {
   content?: string;
   excerpt?: string;
   hero_image_url?: string;
-  published_at: string;
+  published_at: string | null;
   created_at?: string;
   updated_at?: string;
   category: { name: string; slug: string } | null;
