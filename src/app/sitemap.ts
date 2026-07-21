@@ -5,12 +5,32 @@ import {
   getAllTagSlugs,
 } from "@/lib/mdx";
 
+export const revalidate = 3600;
+
 const baseUrl = "https://tech-setup.vercel.app";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const slugs = await getAllPublishedSlugs();
-  const categorySlugs = await getAllCategorySlugs();
-  const tagSlugs = await getAllTagSlugs();
+  let slugs: string[] = [];
+  let categorySlugs: string[] = [];
+  let tagSlugs: string[] = [];
+
+  try {
+    slugs = await getAllPublishedSlugs();
+  } catch (e) {
+    console.error("[sitemap] Failed to fetch article slugs:", e);
+  }
+
+  try {
+    categorySlugs = await getAllCategorySlugs();
+  } catch (e) {
+    console.error("[sitemap] Failed to fetch category slugs:", e);
+  }
+
+  try {
+    tagSlugs = await getAllTagSlugs();
+  } catch (e) {
+    console.error("[sitemap] Failed to fetch tag slugs:", e);
+  }
 
   const articles = slugs.map((slug) => ({
     url: `${baseUrl}/blog/${slug}`,
