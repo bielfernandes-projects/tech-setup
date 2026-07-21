@@ -20,17 +20,17 @@ export default function ContactPage() {
         </p>
         <ul>
           <li>
-            <strong>Errors & corrections:</strong> Let us know and we&apos;ll
+            <strong>Errors & corrections: </strong> Let us know and we&apos;ll
             fix it promptly.
           </li>
           <li>
-            <strong>Topic suggestions:</strong> We&apos;re always looking for
+            <strong>Topic suggestions: </strong> We&apos;re always looking for
             new troubleshooting guides.
           </li>
         </ul>
         <p>
           Email:{" "}
-          <a href="mailto:contact@techsetup.com">contact@techsetup.com</a>
+          <a href="mailto:gabriel.fernandeshw@gmail.com">gabriel.fernandeshw@gmail.com</a>
         </p>
       </div>
     </main>

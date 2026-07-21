@@ -5,13 +5,14 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  --color-bg: oklch(0.141 0.004 285);
-  --color-surface: oklch(0.18 0.006 286);
-  --color-ink: oklch(0.92 0.004 286);
-  --color-primary: oklch(0.65 0.15 160);
-  --color-accent: oklch(0.78 0.13 85);
-  --color-muted: oklch(0.552 0.015 286);
-  --color-border: oklch(0.27 0.007 286);
+  --color-bg: #000715;
+  --color-surface: #111114;
+  --color-ink: oklch(0.93 0.004 286);
+  --color-primary: oklch(0.55 0.22 308);
+  --color-primary-hover: oklch(0.62 0.21 308);
+  --color-accent: #018EDB;
+  --color-muted: oklch(0.62 0.012 286);
+  --color-border: #1E1E28;
 }
 
 html {
@@ -22,6 +23,16 @@ html {
 body {
   color: var(--color-ink);
   background: var(--color-bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 a {
@@ -38,13 +49,21 @@ h1, h2, h3 {
   text-wrap: balance;
 }
 
+.section-heading {
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
 .prose {
   --tw-prose-body: var(--color-ink);
   --tw-prose-headings: oklch(0.98 0.001 286);
   --tw-prose-links: var(--color-primary);
   --tw-prose-bold: oklch(0.98 0.001 286);
   --tw-prose-code: oklch(0.92 0.004 286);
-  --tw-prose-pre-bg: oklch(0.14 0.006 285);
+  --tw-prose-pre-bg: #00050F;
   --tw-prose-pre-code: oklch(0.90 0.005 286);
   --tw-prose-counters: var(--color-muted);
   --tw-prose-bullets: var(--color-muted);
@@ -54,6 +73,14 @@ h1, h2, h3 {
   --tw-prose-captions: var(--color-muted);
   --tw-prose-th-borders: var(--color-border);
   --tw-prose-td-borders: var(--color-border);
+}
+
+.prose h2 {
+  scroll-margin-top: 5rem;
+}
+
+.prose h3 {
+  scroll-margin-top: 5rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

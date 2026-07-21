@@ -211,6 +211,28 @@ export class SupabaseArticleRepository implements ArticleRepository {
     return (data ?? []).map((a) => a.slug);
   }
 
+  async listCategories(): Promise<(Category & { count: number })[]> {
+    const { data: categories, error: catError } = await getClient()
+      .from("categories")
+      .select("id, name, slug");
+
+    if (catError || !categories) return [];
+
+    const results: (Category & { count: number })[] = [];
+
+    for (const cat of categories) {
+      const { count } = await getClient()
+        .from("articles")
+        .select("id", { count: "exact", head: true })
+        .eq("category_id", cat.id)
+        .eq("status", "published");
+
+      results.push({ ...cat, count: count ?? 0 });
+    }
+
+    return results;
+  }
+
   async listCategorySlugs(): Promise<string[]> {
     const { data, error } = await getClient().from("categories").select("slug");
 

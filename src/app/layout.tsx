@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import Link from "next/link";
-import { site, siteUrl } from "@/lib/site";
+import { site } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -71,6 +71,15 @@ const footerLinks = [
   { href: "/dmca", label: "DMCA" },
 ];
 
+const footerCategories = [
+  { href: "/blog/category/windows-setup", label: "Windows Setup" },
+  { href: "/blog/category/discord-bots", label: "Discord Bots" },
+  { href: "/blog/category/ai-development", label: "AI Development" },
+  { href: "/blog/category/devops", label: "DevOps" },
+  { href: "/blog/category/linux", label: "Linux" },
+  { href: "/blog/category/home-automation", label: "Home Automation" },
+];
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -108,22 +117,51 @@ export default function RootLayout({
         </main>
 
         <footer className="border-t border-border mt-16">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="text-sm text-muted">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8">
+              <div>
+                <h3 className="text-sm font-semibold text-ink mb-3">Site</h3>
+                <ul className="space-y-2">
+                  <li><Link href="/" className="text-sm text-muted hover:text-ink transition-colors">Home</Link></li>
+                  <li><Link href="/about" className="text-sm text-muted hover:text-ink transition-colors">About</Link></li>
+                  <li><Link href="/contact" className="text-sm text-muted hover:text-ink transition-colors">Contact</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-ink mb-3">Categories</h3>
+                <ul className="space-y-2">
+                  {footerCategories.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} className="text-sm text-muted hover:text-ink transition-colors">
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-ink mb-3">Legal</h3>
+                <ul className="space-y-2">
+                  {footerLinks.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} className="text-sm text-muted hover:text-ink transition-colors">
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-ink mb-3">{site.name}</h3>
+                <p className="text-sm text-muted leading-relaxed">
+                  Built for developers who debug for a living.
+                </p>
+              </div>
+            </div>
+            <div className="border-t border-border pt-6 flex items-center justify-between">
+              <p className="text-xs text-muted/60">
                 &copy; {new Date().getFullYear()} {site.name}. All rights reserved.
               </p>
-              <nav className="flex items-center gap-4">
-                {footerLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="text-xs text-muted hover:text-ink transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </nav>
             </div>
           </div>
         </footer>

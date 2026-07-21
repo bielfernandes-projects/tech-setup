@@ -39,6 +39,11 @@ export interface ArticleRepository {
   listPublishedSlugs(): Promise<string[]>;
 
   /**
+   * List all categories with article counts.
+   */
+  listCategories(): Promise<(Category & { count: number })[]>;
+
+  /**
    * List all category slugs.
    */
   listCategorySlugs(): Promise<string[]>;

@@ -10,9 +10,9 @@
 | Camada | Tecnologia | Status |
 |--------|-----------|--------|
 | Frontend | Next.js 16 (App Router) | ✅ Ativo |
-| Estilização | Tailwind CSS 4 + @tailwindcss/typography | ✅ Ativo |
-| Design System | OKLCH palette (zinc dark mode, 100%) | ✅ Ativo |
-| Markdown | react-markdown + remark-gfm + rehype-raw | ✅ Ativo |
+| Estilização | Tailwind CSS 4 + @tailwindcss/typography + Lucide React | ✅ Ativo |
+| Design System | OKLCH palette (azul marinho #0A0C21 + roxo #7A00B3 + amber accent, 100% dark) | ✅ Ativo |
+| Markdown | react-markdown + remark-gfm + rehype-sanitize + rehype-slug | ✅ Ativo |
 | Banco | Supabase PostgreSQL (us-east-1) | ✅ Ativo |
 | Storage | Supabase Storage (hero-images) | ✅ Ativo |
 | CDN/Analytics | Vercel (Auto-deploy + @vercel/analytics) | ✅ Ativo |
@@ -77,25 +77,21 @@
 
 ## Layout
 
-- Header: site name + nav (Home, About, Contact)
-- Footer: copyright + legal links
-- Single column, max-width 48rem (3xl)
+- Header: site name + nav (Home, About, Contact) — 56px fixed
+- Footer: 4-column grid (Site / Categories / Legal / Tagline) — "Built for developers who debug for a living"
+- Single column, max-width 48rem (3xl), except artigo page (6xl com sidebar TOC)
+- Home: hero com H1 + subheadline + métricas ("X guides published · Y topics covered") + category chips + featured article + category grid + latest articles list
+- Artigo: reading progress bar (1px top) + breadcrumbs (aria-current) + author byline (avatar + "Reviewed {date}") + reading time + last updated badge + content + tags + related articles (com miniatura) + lateral TOC (desktop)
 - Hero image (next/image, priority, 16:9 ratio)
-- H1 + published date + author byline + category link
-- Breadcrumb navigation (Home > Category > Article)
-- Ad placeholders (in-content + footer, dashed border)
-- Related articles section at bottom
-- Tags as pills below content
-- FAQ sections nos top 3 artigos
 - Empty state: centered message
 - 404: minimal with back-to-home CTA
 
 ## Design System
 
-- **Paleta:** OKLCH — zinc dark mode (100%), sem light mode
+- **Paleta:** OKLCH — azul marinho escuro (#0A0C21) + cinza surface (#111114), 100% dark, sem light mode
 - **Tipografia:** Geist Sans (corpo) + Geist Mono (código)
-- **Cores:** bg=zinc-950, surface=zinc-900, ink=zinc-300, primary=teal (oklch 0.65 0.15 160), accent=amber (oklch 0.78 0.13 85), muted=zinc-500, border=zinc-800
-- **WCAG 2.1 AA** — contraste ≥4.5:1 corpo
+- **Cores:** bg=#000715 (azul marinho), surface=#111114 (cinza), ink=zinc-300, primary=oklch(0.55 0.22 308) (roxo claro), primary-hover=oklch(0.62 0.21 308), accent=#018EDB (azul claro), muted=oklch(0.62 0.012 286), border=#1E1E28
+- **WCAG 2.1 AA** — contraste ≥4.5:1 corpo, `:focus-visible` ring em todos os links/botões
 - **`prefers-reduced-motion`** respeitado
 - **`color-scheme: dark`** definido no `<html>`
 - Veja `DESIGN.md` e `PRODUCT.md` pra detalhes completos
@@ -127,12 +123,22 @@ src/
 │   ├── page.tsx
 │   ├── robots.ts
 │   └── sitemap.ts
+├── components/
+│   ├── ArticleCard.tsx        # Card reutilizável pra listas de artigos
+│   ├── AuthorByline.tsx       # Avatar + nome + "Reviewed {date}"
+│   ├── CategoryChips.tsx      # Pills horizontais de categorias
+│   ├── CategoryGrid.tsx       # Grid 2x4 de categorias com emoji + descrição
+│   ├── FeaturedArticle.tsx    # Card grande pra artigo em destaque na home
+│   ├── ReadingProgress.tsx    # Barra de progresso 1px no topo (client)
+│   └── TableOfContents.tsx    # TOC lateral com IntersectionObserver (client)
 ├── lib/
 │   ├── articles/
-│   │   ├── repository.ts       # ArticleRepository interface
+│   │   ├── repository.ts       # ArticleRepository interface (inclui listCategories)
 │   │   ├── supabase-adapter.ts # Supabase implementation
 │   │   └── index.ts            # exports
-│   ├── markdown-content.tsx
+│   ├── article-data.ts         # Metadados de categorias (emoji + descrição)
+│   ├── markdown-content.tsx    # ReactMarkdown + rehype-sanitize + rehype-slug
+│   ├── reading-time.ts         # Calcula tempo de leitura (200 wpm)
 │   ├── site.ts                 # single source of truth: name, url, helpers
 │   ├── supabase.ts
 │   └── types.ts
@@ -149,11 +155,26 @@ scripts/
 
 ## Arquitetura
 
+### Componentes UI
+
+Todos em `src/components/`:
+
+| Componente | Tipo | Descrição |
+|-----------|------|-----------|
+| `ArticleCard` | Server | Card reutilizável — hero image + data + categoria + título + excerpt |
+| `FeaturedArticle` | Server | Card grande — hero image com gradient, "Featured" badge, reading time, CTA |
+| `CategoryChips` | Server | Pills horizontais — Lucide icon + nome + contagem |
+| `CategoryGrid` | Server | Grid 2x4 — Lucide icon com bg-primary/15 + nome + descrição + contagem |
+| `AuthorByline` | Server | Avatar "TS" + nome + "Reviewed {date}" |
+| `ReadingProgress` | Client | Barra 1px no topo — scroll progress com IntersectionObserver |
+| `TableOfContents` | Client | TOC lateral (xl+) — IntersectionObserver + heading highlighting |
+
 ### Repository Pattern
 
 - `src/lib/articles/repository.ts` define a interface `ArticleRepository` — a única superfície que as páginas conhecem.
 - `src/lib/articles/supabase-adapter.ts` implementa a interface com queries Supabase + normalização.
 - Todas as páginas usam `articleRepository` exportado de `src/lib/articles`. O schema do banco fica isolado no adapter.
+- Métodos: `findPublished`, `findBySlug`, `findByCategory`, `findByTag`, `findRelated`, `listPublishedSlugs`, `listCategories` (com counts), `listCategorySlugs`, `listTagSlugs`, `findCategoryBySlug`, `findTagBySlug`.
 - Antigo `src/lib/mdx.ts` removido (era uma coleção de 12 funções thin wrappers).
 
 ### Site Constants
@@ -227,7 +248,17 @@ scripts/
 - **Sitemap completo:** Home + artigos + categories + tags + páginas estáticas (about, contact, privacy, terms, cookies, dmca)
 - **Home page ISR:** `revalidate: 60` (substituiu force-dynamic)
 - **Breadcrumb navigation:** Visível em artigos, categories, tags
-- **Author byline:** "Tech Setup" como organização em todos os artigos
+- **Author byline:** "Tech Setup" como organização em todos os artigos — avatar "TS" + "Reviewed {date}"
+- **Reading time:** Calculado (200 wpm) em artigos e featured article
+- **Last updated badge:** Mostrado se `updated_at > published_at + 7 dias`
+- **Table of Contents:** Lateral (desktop xl+) com IntersectionObserver, heading highlighting
+- **Reading progress bar:** 1px fixa no topo durante scroll do artigo
+- **Related articles com miniatura:** Thumbnails 80x112px + título + data + categoria
+- **Category chips:** Pills horizontais clicáveis na home com emoji + contagem
+- **Category grid:** Cards 2x4 na home com emoji + descrição + contagem de artigos
+- **Featured article:** Card grande na home com gradient overlay, reading time, CTA
+- **Footer expandido:** 4 colunas (Site, Categories, Legal, Tagline)
+- **Acessibilidade:** `:focus-visible` ring, `aria-current="page"` em breadcrumbs, contraste aprimorado (muted oklch 0.6)
 - **FAQ sections:** Adicionadas às top 3 páginas (WiFi, Discord Mic, Discord Bot) — schema FAQPage para rich results
 - **E-E-A-T:** About page expandida com quem somos, o que cobrimos, política editorial
 
@@ -235,7 +266,7 @@ scripts/
 
 - **Status:** Aguardando pré-requisitos
 - **Requisitos:** ~30 artigos publicados + indexação + tráfego orgânico
-- **Placeholders:** Ad placeholders no layout do artigo (in-content + footer)
+- **Placeholders:** Removidos do layout do artigo — AdSense insere os próprios quando aprovado
 - **Script:** A adicionar após aprovação (via `next/script` `lazyOnload`)
 
 ### Imagens Externas (next/image)

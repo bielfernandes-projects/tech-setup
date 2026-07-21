@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { articleRepository } from "@/lib/articles";
-import { site, siteUrl } from "@/lib/site";
+import { siteUrl } from "@/lib/site";
+import ArticleCard from "@/components/ArticleCard";
 
 export const revalidate = 60;
 
@@ -83,7 +83,6 @@ export default async function TagPage({
       />
 
       <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-        {/* Breadcrumbs */}
         <nav className="text-sm text-muted mb-8" aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-1">
             <li>
@@ -98,7 +97,7 @@ export default async function TagPage({
               </Link>
             </li>
             <li aria-hidden="true">/</li>
-            <li className="text-ink">#{tag.name}</li>
+            <li aria-current="page" className="text-ink">#{tag.name}</li>
           </ol>
         </nav>
 
@@ -118,58 +117,7 @@ export default async function TagPage({
         ) : (
           <div className="space-y-14">
             {articles.map((article) => (
-              <article key={article.slug} className="group">
-                {article.hero_image_url && (
-                  <Link href={`/blog/${article.slug}`} className="block mb-4">
-                    <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-surface">
-                      <Image
-                        src={article.hero_image_url}
-                        alt={article.title}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                        sizes="(max-width: 768px) 100vw, 720px"
-                      />
-                    </div>
-                  </Link>
-                )}
-                <div>
-                  <div className="flex items-center gap-2 text-sm text-muted mb-2">
-                    <time dateTime={article.published_at ?? undefined}>
-                      {new Date(
-                        article.published_at ?? article.created_at ?? Date.now(),
-                      ).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </time>
-                    {article.category && (
-                      <>
-                        <span className="text-muted">·</span>
-                        <Link
-                          href={`/blog/category/${article.category.slug}`}
-                          className="hover:text-primary transition-colors"
-                        >
-                          {article.category.name}
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                  <h2 className="text-xl font-semibold leading-snug mb-1.5">
-                    <Link
-                      href={`/blog/${article.slug}`}
-                      className="hover:text-primary transition-colors"
-                    >
-                      {article.title}
-                    </Link>
-                  </h2>
-                  {article.excerpt && (
-                    <p className="text-muted leading-relaxed">
-                      {article.excerpt}
-                    </p>
-                  )}
-                </div>
-              </article>
+              <ArticleCard key={article.slug} article={article} />
             ))}
           </div>
         )}

@@ -1,12 +1,21 @@
-import Link from "next/link";
-import Image from "next/image";
 import { articleRepository } from "@/lib/articles";
 import { site, siteUrl } from "@/lib/site";
+import FeaturedArticle from "@/components/FeaturedArticle";
+import ArticleCard from "@/components/ArticleCard";
+import CategoryChips from "@/components/CategoryChips";
+import CategoryGrid from "@/components/CategoryGrid";
 
 export const revalidate = 60;
 
 export default async function Home() {
-  const articles = await articleRepository.findPublished(20);
+  const [articles, categories] = await Promise.all([
+    articleRepository.findPublished(20),
+    articleRepository.listCategories(),
+  ]);
+
+  const featured = articles[0] ?? null;
+  const rest = featured ? articles.slice(1) : articles;
+  const totalCount = categories.reduce((sum, c) => sum + c.count, 0);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -46,76 +55,55 @@ export default async function Home() {
       />
 
       <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+        {/* Hero */}
         <header className="mb-12">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-balance">
             {site.name}
           </h1>
-          <p className="mt-3 text-lg text-muted max-w-xl">
+          <p className="mt-3 text-lg text-muted max-w-xl leading-relaxed">
             {site.description}
           </p>
+          <div className="mt-4 flex items-center gap-3 text-sm text-muted/70">
+            <span>{totalCount} guides published</span>
+            <span aria-hidden="true">·</span>
+            <span>{categories.length} topics covered</span>
+          </div>
         </header>
 
-        <section>
-          {articles.length === 0 ? (
+        {/* Category chips */}
+        {categories.length > 0 && (
+          <section className="mb-10" aria-label="Browse by topic">
+            <CategoryChips categories={categories} counts={Object.fromEntries(categories.map((c) => [c.slug, c.count]))} />
+          </section>
+        )}
+
+        {/* Featured article */}
+        {featured && (
+          <section className="mb-14" aria-label="Featured article">
+            <FeaturedArticle article={featured} />
+          </section>
+        )}
+
+        {/* Category grid */}
+        {categories.length > 0 && (
+          <section className="mb-14" aria-label="Browse categories">
+            <h2 className="text-lg font-semibold mb-4">Browse by category</h2>
+            <CategoryGrid categories={categories} counts={Object.fromEntries(categories.map((c) => [c.slug, c.count]))} />
+          </section>
+        )}
+
+        {/* Article list */}
+        <section aria-label="All articles">
+          <h2 className="text-lg font-semibold mb-6">Latest articles</h2>
+          {rest.length === 0 ? (
             <div className="py-20 text-center">
               <p className="text-muted text-lg">No articles published yet.</p>
               <p className="text-muted/60 text-sm mt-2">Check back soon.</p>
             </div>
           ) : (
             <div className="space-y-14">
-              {articles.map((article) => (
-                <article key={article.slug} className="group">
-                  {article.hero_image_url && (
-                    <Link href={`/blog/${article.slug}`} className="block mb-4">
-                      <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-surface">
-                        <Image
-                          src={article.hero_image_url}
-                          alt={article.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                          sizes="(max-width: 768px) 100vw, 720px"
-                        />
-                      </div>
-                    </Link>
-                  )}
-                  <div>
-                    <div className="flex items-center gap-2 text-sm text-muted mb-2">
-                      <time dateTime={article.published_at ?? undefined}>
-                        {new Date(
-                          article.published_at ?? article.created_at ?? Date.now(),
-                        ).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </time>
-                      {article.category && (
-                        <>
-                          <span className="text-muted">·</span>
-                          <Link
-                            href={`/blog/category/${article.category.slug}`}
-                            className="hover:text-primary transition-colors"
-                          >
-                            {article.category.name}
-                          </Link>
-                        </>
-                      )}
-                    </div>
-                    <h2 className="text-xl font-semibold leading-snug mb-1.5">
-                      <Link
-                        href={`/blog/${article.slug}`}
-                        className="hover:text-primary transition-colors"
-                      >
-                        {article.title}
-                      </Link>
-                    </h2>
-                    {article.excerpt && (
-                      <p className="text-muted leading-relaxed">
-                        {article.excerpt}
-                      </p>
-                    )}
-                  </div>
-                </article>
+              {rest.map((article) => (
+                <ArticleCard key={article.slug} article={article} />
               ))}
             </div>
           )}
