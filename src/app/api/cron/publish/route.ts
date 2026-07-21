@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
+import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -9,52 +10,71 @@ function getAdmin() {
   return supabaseAdmin;
 }
 
-export async function GET() {
-  const { data: articles, error } = await getAdmin()
-    .from("articles")
-    .select("slug")
-    .eq("status", "scheduled")
-    .lte("published_at", new Date().toISOString());
+export async function GET(request: NextRequest) {
+  // Only Vercel Cron should be able to trigger this endpoint.
+  const auth = request.headers.get("authorization");
+  const expected = process.env.CRON_SECRET;
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!expected) {
+    console.error("[cron/publish] CRON_SECRET is not configured");
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 
-  if (!articles || articles.length === 0) {
-    return NextResponse.json({ published: 0 });
+  if (auth !== `Bearer ${expected}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const slugs = articles.map((a) => a.slug);
-  const now = new Date().toISOString();
+  try {
+    const { data: articles, error } = await getAdmin()
+      .from("articles")
+      .select("slug")
+      .eq("status", "scheduled")
+      .lte("published_at", new Date().toISOString());
 
-  const { error: updateError } = await getAdmin()
-    .from("articles")
-    .update({ status: "published", published_at: now })
-    .in("slug", slugs);
-
-  if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
-  }
-
-  // Revalidate each published article
-  const revalidateSecret = process.env.REVALIDATE_SECRET;
-  for (const slug of slugs) {
-    try {
-      await fetch(
-        `https://${process.env.VERCEL_URL ?? "localhost:3000"}/api/revalidate`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-revalidate-secret": revalidateSecret ?? "",
-          },
-          body: JSON.stringify({ slug }),
-        },
+    if (error) {
+      console.error("[cron/publish] Failed to fetch scheduled articles:", error);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
       );
-    } catch {
-      // Log error but continue
     }
-  }
 
-  return NextResponse.json({ published: slugs.length, slugs });
+    if (!articles || articles.length === 0) {
+      return NextResponse.json({ published: 0 });
+    }
+
+    const slugs = articles.map((a) => a.slug);
+    const now = new Date().toISOString();
+
+    const { error: updateError } = await getAdmin()
+      .from("articles")
+      .update({ status: "published", published_at: now })
+      .in("slug", slugs);
+
+    if (updateError) {
+      console.error("[cron/publish] Failed to publish articles:", updateError);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
+      );
+    }
+
+    // Revalidate public caches directly. No HTTP round-trip, no secret sharing.
+    revalidatePath("/");
+    revalidatePath("/sitemap.xml");
+    for (const slug of slugs) {
+      revalidatePath(`/blog/${slug}`);
+    }
+
+    return NextResponse.json({ published: slugs.length, slugs });
+  } catch (err) {
+    console.error("[cron/publish] Unexpected error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
 }
