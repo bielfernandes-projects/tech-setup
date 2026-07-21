@@ -4,4 +4,53 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-bg: oklch(1.000 0.000 0);
+  --color-surface: oklch(0.975 0.005 160);
+  --color-ink: oklch(0.15 0.01 160);
+  --color-primary: oklch(0.45 0.12 160);
+  --color-accent: oklch(0.72 0.10 85);
+  --color-muted: oklch(0.55 0.008 160);
+}
+
+html {
+  text-wrap: pretty;
+}
+
+body {
+  color: var(--color-ink);
+  background: var(--color-bg);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration-thickness: 0.5px;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+.prose {
+  --tw-prose-body: var(--color-ink);
+  --tw-prose-headings: var(--color-ink);
+  --tw-prose-links: var(--color-primary);
+  --tw-prose-bold: var(--color-ink);
+  --tw-prose-code: var(--color-ink);
+  --tw-prose-pre-bg: oklch(0.18 0.01 160);
+  --tw-prose-pre-code: oklch(0.90 0.005 160);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

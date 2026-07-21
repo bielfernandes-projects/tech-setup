@@ -9,6 +9,7 @@ export interface Article {
   created_at?: string;
   updated_at?: string;
   category: { name: string; slug: string } | null;
+  tags?: Tag[];
 }
 
 export interface Category {
@@ -18,7 +19,7 @@ export interface Category {
 }
 
 export interface Tag {
-  id: string;
+  id?: string;
   name: string;
   slug: string;
 }
