@@ -80,7 +80,7 @@
 - Header: site name + nav (Home, About, Contact) — 56px fixed
 - Footer: 4-column grid (Site / Categories / Legal / Tagline) — "Built for developers who debug for a living"
 - Single column, max-width 48rem (3xl), except artigo page (6xl com sidebar TOC)
-- Home: hero com H1 + subheadline + métricas ("X guides published · Y topics covered") + category chips + featured article + category grid + latest articles list
+- Home: hero com H1 + subheadline + métricas ("X guides published · Y topics covered") + category chips + featured article + category grid + latest articles list. **Featured** é sempre o artigo mais recente (por `published_at desc`). Não há flag `is_featured` no banco — é dinâmico. Artigos novos viram featured por ~24h. Para controle editorial manual, considerar coluna `is_featured` + método `findFeatured()` no repository.
 - Artigo: reading progress bar (1px top) + breadcrumbs (aria-current) + author byline (avatar + "Reviewed {date}") + reading time + last updated badge + content + tags + related articles (com miniatura) + lateral TOC (desktop)
 - Hero image (next/image, priority, 16:9 ratio)
 - Empty state: centered message
