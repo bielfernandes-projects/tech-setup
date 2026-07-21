@@ -59,18 +59,18 @@
 
 | Rota | Tipo | Descrição |
 |------|------|-----------|
-| `/` | Dynamic | Home — lista artigos recentes com hero images |
-| `/blog/[slug]` | SSG (ISR) | Página do artigo + related articles + tags |
-| `/blog/category/[slug]` | SSG | Lista artigos por categoria |
-| `/blog/tag/[slug]` | SSG | Lista artigos por tag |
-| `/about` | Static | About + editorial policy |
-| `/contact` | Static | Contato |
-| `/privacy-policy` | Static | Privacidade |
-| `/terms` | Static | Termos de uso |
-| `/cookie-policy` | Static | Política de cookies |
-| `/dmca` | Static | DMCA notice |
-| `/sitemap.xml` | Dynamic | Generated from DB |
-| `/robots.txt` | Static | Generated from code |
+| `/` | ISR (60s) | Home — lista artigos recentes com hero images + WebSite/ItemList JSON-LD |
+| `/blog/[slug]` | SSG (ISR) | Página do artigo + related articles + tags + Article/BreadcrumbList JSON-LD + breadcrumbs |
+| `/blog/category/[slug]` | SSG (ISR) | Lista artigos por categoria + CollectionPage JSON-LD + breadcrumbs |
+| `/blog/tag/[slug]` | SSG (ISR) | Lista artigos por tag + CollectionPage JSON-LD + breadcrumbs |
+| `/about` | Static | About + E-E-A-T + AboutPage JSON-LD + canonical |
+| `/contact` | Static | Contato + canonical |
+| `/privacy-policy` | Static | Privacidade + canonical |
+| `/terms` | Static | Termos de uso + canonical |
+| `/cookie-policy` | Static | Política de cookies + canonical |
+| `/dmca` | Static | DMCA notice + canonical |
+| `/sitemap.xml` | Dynamic | Generated from DB (articles + categories + tags + static pages) |
+| `/robots.txt` | Static | Generated from code (hardcoded domain) |
 | `/api/revalidate` | POST | On-demand ISR (secret protected) |
 | `/api/cron/publish` | GET | Vercel cron — published scheduled articles |
 | not-found | Static | 404 page |
@@ -81,10 +81,12 @@
 - Footer: copyright + legal links
 - Single column, max-width 48rem (3xl)
 - Hero image (next/image, priority, 16:9 ratio)
-- H1 + published date + category link
+- H1 + published date + author byline + category link
+- Breadcrumb navigation (Home > Category > Article)
 - Ad placeholders (in-content + footer, dashed border)
 - Related articles section at bottom
 - Tags as pills below content
+- FAQ sections nos top 3 artigos
 - Empty state: centered message
 - 404: minimal with back-to-home CTA
 
@@ -156,6 +158,7 @@ scripts/
 - **Auto-consumo:** Tópicos são removidos do topics.json após uso bem-sucedido
 - **Auto-refill:** `--refill N` gera novos tópicos via Gemini ao final do batch
 - **Quota:** Gemini free tier por modelo, varia entre 20-1500 req/dia
+- **GEM instruction:** `scripts/gem-instruction.md` — instrução para o GEM gerar SQL de artigos. Fluxo em 2 passos: (1) SQL com estrutura (content=NULL), (2) conteúdo Markdown + UPDATE. Anti-patterns: sem CREATE TABLE, sem URLs no conteúdo, sem truncamento
 
 ### Agendamento de Artigos
 
@@ -193,6 +196,18 @@ scripts/
 - **Sitemap:** https://tech-setup.vercel.app/sitemap.xml (submetido)
 - **Propriedade:** Prefixo de URL (https://tech-setup.vercel.app)
 
+### SEO Implementado
+
+- **Canonical tags:** Todas as páginas têm `alternates.canonical` (artigos, categories, tags, about, contact, legal pages)
+- **JSON-LD structured data:** Article + BreadcrumbList em cada artigo, WebSite + Organization + ItemList na home, CollectionPage em categories/tags, AboutPage em /about
+- **Open Graph:** Dinâmico por artigo (hero image + título + excerpt), Twitter card large image
+- **Sitemap completo:** Home + artigos + categories + tags + páginas estáticas (about, contact, privacy, terms, cookies, dmca)
+- **Home page ISR:** `revalidate: 60` (substituiu force-dynamic)
+- **Breadcrumb navigation:** Visível em artigos, categories, tags
+- **Author byline:** "Tech Setup" como organização em todos os artigos
+- **FAQ sections:** Adicionadas às top 3 páginas (WiFi, Discord Mic, Discord Bot) — schema FAQPage para rich results
+- **E-E-A-T:** About page expandida com quem somos, o que cobrimos, política editorial
+
 ### Google AdSense
 
 - **Status:** Aguardando pré-requisitos
@@ -220,7 +235,7 @@ Pra adicionar domínios: editar `next.config.ts` → `images.remotePatterns`.
 - [x] Test deployment em producao
 - [x] Criar script Node.js de geracao de artigos (IA -> Supabase)
 - [x] Criar script de agendamento automatico (schedule-articles.ts)
-- [ ] Popular dados reais (40 artigos) — 8 criados, quota Gemini free = 10/dia
+- [ ] Popular dados reais (40 artigos) — 19 criados (9 published, 10 scheduled), quota Gemini free = 10/dia
 - [x] Configurar cron na Vercel (/api/cron/publish) — 1x/dia (Hobby plan)
 - [x] Configurar Vercel Analytics
 - [x] Front-end: design system, layout, category/tag pages, hero images

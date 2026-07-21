@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 
+const siteUrl = "https://tech-setup.vercel.app";
+
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Get in touch with Tech Setup.",
+  description: "Get in touch with Tech Setup — questions, corrections, and topic suggestions welcome.",
+  alternates: {
+    canonical: `${siteUrl}/contact`,
+  },
 };
 
 export default function ContactPage() {

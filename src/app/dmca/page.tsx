@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 
+const siteUrl = "https://tech-setup.vercel.app";
+
 export const metadata: Metadata = {
   title: "DMCA Notice",
+  description: "Tech Setup DMCA policy — how to report copyright infringement.",
+  alternates: {
+    canonical: `${siteUrl}/dmca`,
+  },
 };
 
 export default function DmcaPage() {

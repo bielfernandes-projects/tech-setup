@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 const siteName = "Tech Setup";
 const siteDescription =
   "Practical guides for developers — troubleshooting, setup, and tools.";
-const siteUrl = "https://techsetup.vercel.app";
+const siteUrl = "https://tech-setup.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

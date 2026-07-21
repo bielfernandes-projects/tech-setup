@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 
+const siteUrl = "https://tech-setup.vercel.app";
+
 export const metadata: Metadata = {
   title: "Cookie Policy",
+  description: "Tech Setup cookie policy — how we use cookies for analytics and advertising.",
+  alternates: {
+    canonical: `${siteUrl}/cookie-policy`,
+  },
 };
 
 export default function CookiePolicyPage() {

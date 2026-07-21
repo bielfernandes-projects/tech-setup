@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 
+const siteUrl = "https://tech-setup.vercel.app";
+
 export const metadata: Metadata = {
   title: "Terms of Service",
+  description: "Tech Setup terms of service — rules for using our content and website.",
+  alternates: {
+    canonical: `${siteUrl}/terms`,
+  },
 };
 
 export default function TermsPage() {
