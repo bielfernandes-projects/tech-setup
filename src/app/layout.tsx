@@ -17,21 +17,45 @@ const geistMono = Geist_Mono({
 const siteName = "Tech Setup";
 const siteDescription =
   "Practical guides for developers — troubleshooting, setup, and tools.";
+const siteUrl = "https://techsetup.vercel.app";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: siteName,
     template: `%s | ${siteName}`,
   },
   description: siteDescription,
   openGraph: {
+    title: siteName,
+    description: siteDescription,
+    url: siteUrl,
     siteName,
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: siteName,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description: siteDescription,
+    images: ["/opengraph-image"],
   },
   robots: {
     index: true,
     follow: true,
+  },
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
   },
   other: {
     "google-site-verification": "7HsyJ-d3CkcuUwYeFbw2I24Dnz7hdC_JavINiLc3eg0",
@@ -62,7 +86,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <header className="border-b border-zinc-100">
+        <header className="border-b border-border">
           <div className="mx-auto max-w-3xl px-4 sm:px-6">
             <div className="flex items-center justify-between h-14">
               <Link href="/" className="font-bold text-lg tracking-tight text-ink hover:text-primary transition-colors">
@@ -87,7 +111,7 @@ export default function RootLayout({
           {children}
         </main>
 
-        <footer className="border-t border-zinc-100 mt-16">
+        <footer className="border-t border-border mt-16">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-sm text-muted">

@@ -52,7 +52,7 @@ export default async function Home() {
                     </time>
                     {article.category && (
                       <>
-                        <span className="text-zinc-300">·</span>
+                        <span className="text-muted">·</span>
                         <Link
                           href={`/blog/category/${article.category.slug}`}
                           className="hover:text-primary transition-colors"

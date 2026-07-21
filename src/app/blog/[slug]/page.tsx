@@ -90,14 +90,14 @@ export default async function ArticlePage({
       )}
 
       {/* Ad placeholder (in-content) */}
-      <div className="my-8 flex items-center justify-center rounded-lg border border-dashed border-zinc-200 bg-surface py-6 text-xs text-muted">
+      <div className="my-8 flex items-center justify-center rounded-lg border border-dashed border-border bg-surface py-6 text-xs text-muted">
         Advertisement
       </div>
 
       {article.content && <MarkdownContent content={article.content} />}
 
       {/* Ad placeholder (footer) */}
-      <div className="my-12 flex items-center justify-center rounded-lg border border-dashed border-zinc-200 bg-surface py-6 text-xs text-muted">
+      <div className="my-12 flex items-center justify-center rounded-lg border border-dashed border-border bg-surface py-6 text-xs text-muted">
         Advertisement
       </div>
 
@@ -118,7 +118,7 @@ export default async function ArticlePage({
 
       {/* Related articles */}
       {related.length > 0 && (
-        <div className="border-t border-zinc-100 mt-12 pt-10">
+        <div className="border-t border-border mt-12 pt-10">
           <h2 className="text-lg font-semibold mb-6">Related articles</h2>
           <div className="space-y-6">
             {related.map((rel) => (
@@ -132,7 +132,7 @@ export default async function ArticlePage({
                   </time>
                   {rel.category && (
                     <>
-                      <span className="text-zinc-300">·</span>
+                      <span className="text-muted">·</span>
                       <span>{rel.category.name}</span>
                     </>
                   )}

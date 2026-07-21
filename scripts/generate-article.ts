@@ -8,7 +8,8 @@
  *
  * Usage:
  *   Single:  npx tsx scripts/generate-article.ts "how to fix discord audio echo" --category troubleshooting --tags discord,audio
- *   Batch:   npx tsx scripts/generate-article.ts --batch
+ *   Batch:   npx tsx scripts/generate-article.ts --batch [--limit N] [--refill N]
+ *   Refill:  npx tsx scripts/generate-article.ts --refill N
  */
 
 import { config } from "dotenv";
@@ -43,6 +44,25 @@ const supabase: SupabaseClient = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KE
 });
 
 const genAI = new GoogleGenerativeAI(GEMINI_KEY!);
+
+// ─── Config ────────────────────────────────────────────────────────────────────
+
+const TOPICS_PATH = path.resolve(__dirname, "topics.json");
+
+const REFILL_PROMPT = `Generate {count} new article topic ideas for "Tech Setup", a faceless niche blog targeting Tier-1 developers (US/EU).
+
+Topics should cover: Discord (troubleshooting, bots), Windows development setup, Node.js, developer tools, gaming servers.
+
+Return ONLY a valid JSON array — no markdown fences, no explanation:
+[
+  {"topic": "How to...", "category": "Troubleshooting", "tags": ["keyword1", "keyword2"]}
+]
+
+Rules:
+- Write in English, specific and actionable topics
+- Categories: Troubleshooting, Discord Bots, Windows Setup, Software Config
+- 3-5 tags per topic
+- Do NOT repeat topics already present in the current topics.json file`;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -86,6 +106,30 @@ async function upsertTags(tagNames: string[]): Promise<string[]> {
   return ids;
 }
 
+function loadTopics(): { topic: string; category: string; tags: string[] }[] {
+  return (JSON.parse(fs.readFileSync(TOPICS_PATH, "utf-8")) as {
+    topics: { topic: string; category: string; tags: string[] }[];
+  }).topics;
+}
+
+function saveTopics(topics: { topic: string; category: string; tags: string[] }[]): void {
+  fs.writeFileSync(TOPICS_PATH, JSON.stringify({ topics }, null, 2) + "\n");
+}
+
+function removeTopicFromFile(topic: string): void {
+  const topics = loadTopics().filter((t) => t.topic !== topic);
+  saveTopics(topics);
+}
+
+function cleanOrphanTopics(existingSlugs: Set<string>): number {
+  const before = loadTopics();
+  const after = before.filter((t) => !existingSlugs.has(slugify(t.topic)));
+  if (after.length < before.length) {
+    saveTopics(after);
+  }
+  return before.length - after.length;
+}
+
 // ─── Gemini ───────────────────────────────────────────────────────────────────
 
 interface GeneratedArticle {
@@ -95,7 +139,7 @@ interface GeneratedArticle {
 }
 
 async function generateWithGemini(topic: string): Promise<GeneratedArticle> {
-  const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+  const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
 
   // Step 1: Generate title + excerpt as small JSON (reliable to parse)
   const metaPrompt = `You are a technical writer for "Tech Setup", a faceless niche blog targeting Tier-1 developers (US/EU).
@@ -170,6 +214,50 @@ Rules:
   }
 
   throw lastError!;
+}
+
+async function generateTopics(count: number): Promise<number> {
+  const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
+  const prompt = REFILL_PROMPT.replace("{count}", String(count));
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
+      const cleaned = text.replace(/```json\s*/i, "").replace(/```\s*$/, "").trim();
+      const parsed = JSON.parse(cleaned) as { topic: string; category: string; tags: string[] }[];
+
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        throw new Error("Empty or invalid topic list returned");
+      }
+
+      const existing = loadTopics();
+      const newTopics = parsed.filter(
+        (p) => !existing.some((e) => e.topic === p.topic),
+      );
+
+      if (newTopics.length === 0) {
+        console.log("   ⚠️  All generated topics already exist in file");
+        return 0;
+      }
+
+      saveTopics([...existing, ...newTopics]);
+      return newTopics.length;
+    } catch (err) {
+      const lastError = err as Error;
+      if (lastError.message.includes("503") || lastError.message.includes("429")) {
+        if (attempt < 3) {
+          const delay = attempt * 5000;
+          console.log(`   ⏳ Refill retry ${attempt}/3 in ${delay / 1000}s...`);
+          await new Promise((r) => setTimeout(r, delay));
+          continue;
+        }
+      }
+      if (attempt >= 3) throw lastError;
+    }
+  }
+
+  throw new Error("Failed to generate topics after 3 attempts");
 }
 
 // ─── Unsplash ─────────────────────────────────────────────────────────────────
@@ -299,17 +387,21 @@ async function main() {
   if (args.includes("--batch")) {
     const limitIdx = args.indexOf("--limit");
     const limit = limitIdx !== -1 ? parseInt(args[limitIdx + 1]) : Infinity;
-    const topicsPath = path.resolve(__dirname, "topics.json");
-    const data = JSON.parse(fs.readFileSync(topicsPath, "utf-8")) as {
-      topics: { topic: string; category: string; tags: string[] }[];
-    };
 
-    const topics = data.topics.slice(0, limit);
-    console.log(`🚀 Batch mode: ${topics.length} topics${limit < Infinity ? ` (limited)` : ""}`);
+    const refillIdx = args.indexOf("--refill");
+    const refillCount = refillIdx !== -1 ? parseInt(args[refillIdx + 1]) : 0;
 
     // Pre-check: skip topics whose slugs already exist in DB
     const { data: existing } = await supabase.from("articles").select("slug");
     const existingSlugs = new Set(existing?.map((a) => a.slug) ?? []);
+
+    // Clean orphan topics from file
+    const cleaned = cleanOrphanTopics(existingSlugs);
+    if (cleaned > 0) console.log(`🧹 Cleaned ${cleaned} orphan topics from topics.json`);
+
+    const allTopics = loadTopics();
+    const topics = allTopics.slice(0, limit);
+    console.log(`🚀 Batch mode: ${topics.length} topics${limit < Infinity ? ` (limited)` : ""}`);
 
     const results: string[] = [];
     const skipped: string[] = [];
@@ -319,11 +411,11 @@ async function main() {
       const t = topics[i];
       console.log(`\n[${i + 1}/${topics.length}]`);
 
-      // Quick slug check before calling Gemini
       const testSlug = slugify(t.topic);
       if (existingSlugs.has(testSlug)) {
         console.log(`   ⏭️  Already exists: ${testSlug}`);
         skipped.push(t.topic);
+        removeTopicFromFile(t.topic);
         continue;
       }
 
@@ -332,6 +424,8 @@ async function main() {
         if (slug) {
           results.push(slug);
           existingSlugs.add(slug);
+          removeTopicFromFile(t.topic);
+          console.log(`   🗑️  Removed from topics.json`);
         } else {
           skipped.push(t.topic);
         }
@@ -339,14 +433,12 @@ async function main() {
         console.error(`   ❌ Error: ${(err as Error).message}`);
         errors.push(t.topic);
 
-        // If it's a quota error, stop early
         if ((err as Error).message.includes("429")) {
-          console.log(`\n⚠️  Quota hit — stopando. Rode de novo amanhã ou reduza a quota.`);
+          console.log(`\n⚠️  Quota hit — stopping. Try again later.`);
           break;
         }
       }
 
-      // Delay between articles: 30s to spread API calls
       if (i < topics.length - 1) {
         console.log(`   ⏳ Waiting 30s...`);
         await new Promise((r) => setTimeout(r, 30_000));
@@ -357,7 +449,43 @@ async function main() {
     console.log(`✅ Created: ${results.length}`);
     console.log(`⏭️  Skipped: ${skipped.length}`);
     console.log(`❌ Errors:  ${errors.length}`);
+    console.log(`📋 ${loadTopics().length} topics remain in queue`);
     if (results.length) console.log(`\nSlugs:\n  ${results.join("\n  ")}`);
+
+    // Auto-refill
+    if (refillCount > 0) {
+      console.log(`\n🔄 Generating ${refillCount} new topics...`);
+      try {
+        const added = await generateTopics(refillCount);
+        console.log(`✅ Added ${added} new topics to topics.json`);
+        console.log(`📋 ${loadTopics().length} topics now in queue`);
+      } catch (err) {
+        console.log(`⚠️  Refill failed: ${(err as Error).message}`);
+      }
+    }
+
+    return;
+  }
+
+  // Standalone refill mode
+  if (args.includes("--refill")) {
+    const refillIdx = args.indexOf("--refill");
+    const refillCount = parseInt(args[refillIdx + 1]);
+
+    if (!refillCount || refillCount < 1) {
+      console.error("❌ Invalid refill count. Usage: --refill N");
+      process.exit(1);
+    }
+
+    console.log(`🔄 Generating ${refillCount} new topics...`);
+    try {
+      const added = await generateTopics(refillCount);
+      console.log(`✅ Added ${added} new topics to topics.json`);
+      console.log(`📋 ${loadTopics().length} topics now in queue`);
+    } catch (err) {
+      console.error(`❌ Refill failed: ${(err as Error).message}`);
+      process.exit(1);
+    }
     return;
   }
 
@@ -365,8 +493,8 @@ async function main() {
   if (args.length < 1) {
     console.log("Usage:");
     console.log('  Single:  npx tsx scripts/generate-article.ts "topic" --category X --tags a,b');
-    console.log("  Batch:   npx tsx scripts/generate-article.ts --batch");
-    console.log("  Limited: npx tsx scripts/generate-article.ts --batch --limit 5");
+    console.log("  Batch:   npx tsx scripts/generate-article.ts --batch [--limit N] [--refill N]");
+    console.log("  Refill:  npx tsx scripts/generate-article.ts --refill N");
     process.exit(1);
   }
 

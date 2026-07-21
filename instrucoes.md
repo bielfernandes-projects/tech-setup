@@ -47,10 +47,26 @@ npx tsx scripts/generate-article.ts "título do artigo" --category "Categoria" -
 ### Geração em batch (lista de tópicos)
 
 ```bash
-npx tsx scripts/generate-article.ts --batch
+npx tsx scripts/generate-article.ts --batch --limit 10
 ```
 
-Tópicos ficam em `scripts/topics.json`. Limite: **20 requests/dia** no Gemini free tier (≈10 artigos).
+Tópicos ficam em `scripts/topics.json` e são **auto-consumidos** (removidos após uso).
+
+### Refill de tópicos
+
+```bash
+# Gerar 5 novos tópicos no topics.json
+npx tsx scripts/generate-article.ts --refill 5
+
+# Batch + refill (consome e repõe automaticamente)
+npx tsx scripts/generate-article.ts --batch --limit 10 --refill 5
+```
+
+O prompt de refill é editável na constante `REFILL_PROMPT` no topo do script.
+
+### GEM (Gemini)
+
+O arquivo `scripts/gem-instruction.md` contém instruções pra criar um GEM que gera SQL pronto pro banco. Use quando a quota do Gemini API esgotar.
 
 ---
 
@@ -124,24 +140,6 @@ Chame o endpoint manualmente:
 ```bash
 curl https://tech-setup.vercel.app/api/cron/publish
 ```
-
----
-
-## 3. Gerar artigos novos
-
-### Geração única
-
-```bash
-npx tsx scripts/generate-article.ts "título do artigo" --category "Categoria" --tags tag1,tag2
-```
-
-### Geração em batch (lista de tópicos)
-
-```bash
-npx tsx scripts/generate-article.ts --batch
-```
-
-Tópicos ficam em `scripts/topics.json`. Limite: **20 requests/dia** no Gemini free tier (≈10 artigos).
 
 ---
 

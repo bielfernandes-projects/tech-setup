@@ -11,7 +11,7 @@
 |--------|-----------|--------|
 | Frontend | Next.js 16 (App Router) | ✅ Ativo |
 | Estilização | Tailwind CSS 4 + @tailwindcss/typography | ✅ Ativo |
-| Design System | OKLCH palette (verde musgo primary) | ✅ Ativo |
+| Design System | OKLCH palette (zinc dark mode, 100%) | ✅ Ativo |
 | Markdown | react-markdown + remark-gfm + rehype-raw | ✅ Ativo |
 | Banco | Supabase PostgreSQL (us-east-1) | ✅ Ativo |
 | Storage | Supabase Storage (hero-images) | ✅ Ativo |
@@ -90,11 +90,12 @@
 
 ## Design System
 
-- **Paleta:** OKLCH — verde musgo (primary), âmbar (accent), fundo branco puro
+- **Paleta:** OKLCH — zinc dark mode (100%), sem light mode
 - **Tipografia:** Geist Sans (corpo) + Geist Mono (código)
-- **Cores:** bg=white, surface=#f8faf8, ink=#222623, primary=#1a6b4a, accent=#c89030, muted=#7a827e
+- **Cores:** bg=zinc-950, surface=zinc-900, ink=zinc-300, primary=teal (oklch 0.65 0.15 160), accent=amber (oklch 0.78 0.13 85), muted=zinc-500, border=zinc-800
 - **WCAG 2.1 AA** — contraste ≥4.5:1 corpo
 - **`prefers-reduced-motion`** respeitado
+- **`color-scheme: dark`** definido no `<html>`
 - Veja `DESIGN.md` e `PRODUCT.md` pra detalhes completos
 
 ## Estrutura de Diretórios
@@ -115,9 +116,12 @@ src/
 │   ├── dmca/page.tsx
 │   ├── privacy-policy/page.tsx
 │   ├── terms/page.tsx
-│   ├── not-found.tsx
+│   ├── favicon.ico
 │   ├── globals.css
+│   ├── icon.svg
 │   ├── layout.tsx
+│   ├── not-found.tsx
+│   ├── opengraph-image.tsx
 │   ├── page.tsx
 │   ├── robots.ts
 │   └── sitemap.ts
@@ -132,6 +136,7 @@ supabase/
 │   └── 20260720214200_hero_images_bucket.sql
 scripts/
 ├── generate-article.ts
+├── gem-instruction.md
 ├── schedule-articles.ts
 └── topics.json
 ```
@@ -142,11 +147,15 @@ scripts/
 
 - **Local:** `scripts/generate-article.ts`
 - **Dependências:** `@google/generative-ai`, `tsx`, `dotenv`
+- **Modelo:** `gemini-flash-lite-latest` (free tier)
 - **Uso single:** `npx tsx scripts/generate-article.ts "topic" --category X --tags a,b`
-- **Uso batch:** `npx tsx scripts/generate-article.ts --batch`
-- **Uso limitado:** `npx tsx scripts/generate-article.ts --batch --limit 5`
+- **Uso batch:** `npx tsx scripts/generate-article.ts --batch [--limit N]`
+- **Uso refill:** `npx tsx scripts/generate-article.ts --refill N` (gera novos tópicos no topics.json)
+- **Uso batch+refill:** `npx tsx scripts/generate-article.ts --batch --limit 10 --refill 5`
 - **Fluxo:** Gemini gera Markdown (2 chamadas: meta + content) → Unsplash busca hero → Supabase Storage → DB como draft
-- **Quota:** Gemini free = 20 requests/dia ≈ 10 artigos/dia
+- **Auto-consumo:** Tópicos são removidos do topics.json após uso bem-sucedido
+- **Auto-refill:** `--refill N` gera novos tópicos via Gemini ao final do batch
+- **Quota:** Gemini free tier por modelo, varia entre 20-1500 req/dia
 
 ### Agendamento de Artigos
 
