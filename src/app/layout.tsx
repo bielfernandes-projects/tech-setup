@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import Script from "next/script";
 import Link from "next/link";
 import { site } from "@/lib/site";
 import "./globals.css";
@@ -90,6 +91,11 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <Script
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4704944043310509"
+        strategy="lazyOnload"
+        crossOrigin="anonymous"
+      />
       <body className="min-h-full flex flex-col font-sans">
         <header className="border-b border-border">
           <div className="mx-auto max-w-3xl px-4 sm:px-6">
