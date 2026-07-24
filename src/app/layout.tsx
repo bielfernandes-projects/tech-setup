@@ -93,8 +93,7 @@ export default function RootLayout({
     >
       <Script
         src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4704944043310509"
-        strategy="lazyOnload"
-        crossOrigin="anonymous"
+        strategy="afterInteractive"
       />
       <body className="min-h-full flex flex-col font-sans">
         <header className="border-b border-border">
