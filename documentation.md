@@ -17,7 +17,7 @@
 | Storage | Supabase Storage (hero-images) | ✅ Ativo |
 | CDN/Analytics | Vercel (Auto-deploy + @vercel/analytics) | ✅ Ativo |
 | Repositório | https://github.com/bielfernandes-projects/tech-setup | ✅ Ativo |
-| Domínio | https://tech-setup.vercel.app | ✅ Ativo |
+| Domínio | https://techsetup.site | ✅ Ativo |
 
 ## Projeto Supabase
 
@@ -180,7 +180,7 @@ Todos em `src/components/`:
 ### Site Constants
 
 - `src/lib/site.ts` centraliza nome, descrição, URL e helpers (`siteUrl`).
-- Fallback de URL: `process.env.NEXT_PUBLIC_SITE_URL ?? "https://tech-setup.vercel.app"`.
+- Fallback de URL: `process.env.NEXT_PUBLIC_SITE_URL ?? "https://techsetup.site"`.
 - Todas as páginas (home, artigos, categorias, tags, about, contact, legal pages) usam `site.name` e `siteUrl()`.
 
 ## Scripts
@@ -218,7 +218,7 @@ Todos em `src/components/`:
 | `SUPABASE_SERVICE_ROLE_KEY` | Vercel + local | Service role (scripts + cron) — **nunca expor no browser** |
 | `REVALIDATE_SECRET` | Vercel + local | Header secret para `/api/revalidate` |
 | `CRON_SECRET` | Vercel | Header `Authorization: Bearer <token>` enviado pelo Vercel Cron para `/api/cron/publish` |
-| `NEXT_PUBLIC_SITE_URL` | Vercel (opcional) | URL canônica do site; fallback é `https://tech-setup.vercel.app` |
+| `NEXT_PUBLIC_SITE_URL` | Vercel (opcional) | URL canônica do site; fallback é `https://techsetup.site` |
 | `GEMINI_API_KEY` | local only | Geração de artigos |
 | `UNSPLASH_ACCESS_KEY` | local only | Busca de hero images |
 | `SUPABASE_URL` | local only | Alias para `NEXT_PUBLIC_SUPABASE_URL` nos scripts |
@@ -237,8 +237,8 @@ Todos em `src/components/`:
 
 - **Status:** Verificado (HTML meta tag no layout.tsx)
 - **Código de verificação:** `7HsyJ-d3CkcuUwYeFbw2I24Dnz7hdC_JavINiLc3eg0`
-- **Sitemap:** https://tech-setup.vercel.app/sitemap.xml (submetido)
-- **Propriedade:** Prefixo de URL (https://tech-setup.vercel.app)
+- **Sitemap:** https://techsetup.site/sitemap.xml (submetido)
+- **Propriedade:** Prefixo de URL (https://techsetup.site)
 
 ### SEO Implementado
 

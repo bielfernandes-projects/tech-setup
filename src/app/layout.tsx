@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     apple: site.icon,
   },
   other: {
-    "google-site-verification": "7HsyJ-d3CkcuUwYeFbw2I24Dnz7hdC_JavINiLc3eg0",
+    "google-site-verification": "MtjK5W3N8G89DsjhL03MlXgaj5lPxmmem9-KeJptP88",
   },
 };
 

@@ -138,7 +138,7 @@ npx tsx scripts/schedule-articles.ts
 Chame o endpoint manualmente:
 
 ```bash
-curl https://tech-setup.vercel.app/api/cron/publish
+curl https://techsetup.site/api/cron/publish
 ```
 
 ---
@@ -158,7 +158,7 @@ Ou faça push pro GitHub — o Vercel faz deploy automático.
 Quando fizer alterações diretas no banco (editar título, trocar hero image, etc), revalide:
 
 ```bash
-curl -X POST https://tech-setup.vercel.app/api/revalidate \
+curl -X POST https://techsetup.site/api/revalidate \
   -H "Content-Type: application/json" \
   -H "x-revalidate-secret: <REVALIDATE_SECRET>" \
   -d '{}'
@@ -167,7 +167,7 @@ curl -X POST https://tech-setup.vercel.app/api/revalidate \
 Isso invalida a home page e o sitemap. Pra revalidar um artigo específico:
 
 ```bash
-curl -X POST https://tech-setup.vercel.app/api/revalidate \
+curl -X POST https://techsetup.site/api/revalidate \
   -H "Content-Type: application/json" \
   -H "x-revalidate-secret: <REVALIDATE_SECRET>" \
   -d '{"slug":"como-configurar-docker"}'
@@ -210,7 +210,7 @@ Todas em `.env.local` e no Vercel:
 
 | Serviço | URL |
 |---|---|
-| Site | https://tech-setup.vercel.app |
+| Site | https://techsetup.site |
 | Supabase Studio | https://supabase.com/dashboard/project/mrkumsgzvsjtlbptrqgl |
 | Vercel Dashboard | https://vercel.com/bielfernandes-projects-projects/tech-setup |
 | GitHub Repo | https://github.com/bielfernandes-projects/tech-setup |
@@ -224,13 +224,13 @@ Todas em `.env.local` e no Vercel:
 ### Configuração
 
 1. Acesse https://search.google.com/search-console
-2. Adicione propriedade → **Prefixo de URL** → `https://tech-setup.vercel.app`
+2. Adicione propriedade → **Prefixo de URL** → `https://techsetup.site`
 3. Verificação via **HTML tag** (tag já está no `layout.tsx`)
 4. Após verificação, submeta o sitemap: **Sitemaps → adicione `sitemap.xml`**
 
 ### Verificar indexação
 
-- Vá em **Inspeção de URL** → cole `https://tech-setup.vercel.app`
+- Vá em **Inspeção de URL** → cole `https://techsetup.site`
 - Clique **Solicitar indexação**
 - Aguarde 1-2 dias pra Google indexar os artigos
 
