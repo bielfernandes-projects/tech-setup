@@ -7,7 +7,7 @@ export function AdSenseScript() {
     <Script
       id="adsbygoogle-init"
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4704944043310509"
-      strategy="afterInteractive"
+      strategy="beforeInteractive"
     />
   );
 }

@@ -340,6 +340,106 @@
         "Server Config",
         "Admin"
       ]
+    },
+    {
+      "topic": "Kubernetes for Beginners: Deploy Your First App",
+      "category": "DevOps",
+      "tags": [
+        "kubernetes",
+        "containers",
+        "devops",
+        "deployment"
+      ]
+    },
+    {
+      "topic": "TypeScript Generics: A Practical Guide",
+      "category": "Software Config",
+      "tags": [
+        "typescript",
+        "generics",
+        "javascript",
+        "programming"
+      ]
+    },
+    {
+      "topic": "PostgreSQL Performance Tuning for Developers",
+      "category": "Software Config",
+      "tags": [
+        "postgresql",
+        "database",
+        "performance",
+        "sql"
+      ]
+    },
+    {
+      "topic": "GitHub Actions: Build a CI/CD Pipeline from Scratch",
+      "category": "DevOps",
+      "tags": [
+        "github-actions",
+        "ci-cd",
+        "automation",
+        "deployment"
+      ]
+    },
+    {
+      "topic": "Linux Command Line: 50 Essential Commands",
+      "category": "Linux",
+      "tags": [
+        "linux",
+        "command-line",
+        "terminal",
+        "productivity"
+      ]
+    },
+    {
+      "topic": "React Server Components: Complete Guide for 2026",
+      "category": "Software Config",
+      "tags": [
+        "react",
+        "server-components",
+        "nextjs",
+        "frontend"
+      ]
+    },
+    {
+      "topic": "Nginx Reverse Proxy: Setup and Configuration Guide",
+      "category": "DevOps",
+      "tags": [
+        "nginx",
+        "reverse-proxy",
+        "web-server",
+        "linux"
+      ]
+    },
+    {
+      "topic": "Wireshark Network Analysis: Beginner to Intermediate",
+      "category": "Software Config",
+      "tags": [
+        "wireshark",
+        "networking",
+        "debugging",
+        "security"
+      ]
+    },
+    {
+      "topic": "Terraform Basics: Infrastructure as Code for Beginners",
+      "category": "DevOps",
+      "tags": [
+        "terraform",
+        "infrastructure",
+        "cloud",
+        "devops"
+      ]
+    },
+    {
+      "topic": "WebSocket vs Server-Sent Events: When to Use Each",
+      "category": "Software Config",
+      "tags": [
+        "websockets",
+        "sse",
+        "real-time",
+        "api"
+      ]
     }
   ]
 }

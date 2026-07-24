@@ -147,10 +147,13 @@ supabase/
 │   ├── 20260720211943_init.sql
 │   └── 20260720214200_hero_images_bucket.sql
 scripts/
-├── generate-article.ts
-├── gem-instruction.md
-├── schedule-articles.ts
-└── topics.json
+├── generate-article.ts      # Geração via Gemini + Unsplash
+├── create-15-articles.ts    # Inserção manual (sem IA)
+├── check-db.ts              # Verificação do estado do banco
+├── clean-topics.ts          # Limpeza de topics.json
+├── schedule-articles.ts     # Agendamento automático
+├── gem-instruction.md       # Instrução GEM
+└── topics.json              # Pool de tópicos para geração
 ```
 
 ## Arquitetura
@@ -185,7 +188,7 @@ Todos em `src/components/`:
 
 ## Scripts
 
-### Geração de Artigos
+### Geração de Artigos (Gemini)
 
 - **Local:** `scripts/generate-article.ts`
 - **Dependências:** `@google/generative-ai`, `tsx`, `dotenv`
@@ -198,7 +201,17 @@ Todos em `src/components/`:
 - **Auto-consumo:** Tópicos são removidos do topics.json após uso bem-sucedido
 - **Auto-refill:** `--refill N` gera novos tópicos via Gemini ao final do batch
 - **Quota:** Gemini free tier por modelo, varia entre 20-1500 req/dia
-- **GEM instruction:** `scripts/gem-instruction.md` — instrução para o GEM gerar SQL de artigos. Fluxo em 2 passos: (1) SQL com estrutura (content=NULL), (2) conteúdo Markdown + UPDATE. Anti-patterns: sem CREATE TABLE, sem URLs no conteúdo, sem truncamento
+- **Nota:** Quota free tier pode ser exaustada rapidamente (~10 artigos/dia)
+- **GEM instruction:** `scripts/gem-instruction.md` — instrução para o GEM gerar SQL de artigos
+
+### Geração Manual de Artigos (sem IA)
+
+- **Local:** `scripts/create-15-articles.ts`
+- **Uso:** `npx tsx scripts/create-15-articles.ts`
+- **Dry run:** `npx tsx scripts/create-15-articles.ts --dry-run`
+- **Fluxo:** Insere artigos com conteúdo markdown completo diretamente no Supabase (sem Gemini/Unsplash)
+- **Uso:** Quando quota Gemini está exausta — artigos são escritos manualmente no script
+- **Agendamento:** 3 artigos/dia, datas configuradas no array `SCHEDULE_DATES`
 
 ### Agendamento de Artigos
 
@@ -208,6 +221,18 @@ Todos em `src/components/`:
 - **Count:** `npx tsx scripts/schedule-articles.ts --count 5`
 - **Fluxo:** Seleciona drafts com hero image → agenda até 3/dia → preenche dias com <3 antes de partir pro próximo
 - **Regras:** Só agenda artigos com `hero_image_url`, ordena por `created_at` ASC (mais antigos primeiro)
+
+### Verificação do Banco
+
+- **Local:** `scripts/check-db.ts`
+- **Uso:** `npx tsx scripts/check-db.ts`
+- **Fluxo:** Mostra contagem de artigos por status, categorias, tags
+
+### Limpeza de Tópicos
+
+- **Local:** `scripts/clean-topics.ts`
+- **Uso:** `npx tsx scripts/clean-topics.ts`
+- **Fluxo:** Remove tópicos já usados no DB, adiciona novos tópicos diversos
 
 ## Variáveis de Entorno
 
@@ -236,9 +261,10 @@ Todos em `src/components/`:
 ### Google Search Console
 
 - **Status:** Verificado (HTML meta tag no layout.tsx)
-- **Código de verificação:** `7HsyJ-d3CkcuUwYeFbw2I24Dnz7hdC_JavINiLc3eg0`
-- **Sitemap:** https://techsetup.site/sitemap.xml (submetido)
+- **Código de verificação:** `MtjK5W3N8G89DsjhL03MlXgaj5lPxmmem9-KeJptP88`
+- **Sitemap:** https://techsetup.site/sitemap.xml (submetido, 169 páginas encontradas)
 - **Propriedade:** Prefixo de URL (https://techsetup.site)
+- **Homepage:** Indexada
 
 ### SEO Implementado
 
@@ -264,8 +290,10 @@ Todos em `src/components/`:
 
 ### Google AdSense
 
-- **Status:** Aguardando pré-requisitos
-- **Requisitos:** ~30 artigos publicados + indexação + tráfego orgânico
+- **Publisher ID:** `ca-pub-4704944043310509`
+- **Status:** Em revisão (verificação via meta tag concluída)
+- **Verificação:** Meta tag `google-adsense-account` no `layout.tsx` (método alternativo — `<Script>` não funcionou)
+- **CSP:** Domínios AdSense autorizados em `next.config.ts` (`pagead2.googlesyndication.com`, `adservice.google.com`, `googleads.g.doubleclick.net`)
 - **Placeholders:** Removidos do layout do artigo — AdSense insere os próprios quando aprovado
 - **Script:** A adicionar após aprovação (via `next/script` `lazyOnload`)
 
@@ -323,15 +351,18 @@ Pra adicionar domínios: editar `next.config.ts` → `images.remotePatterns`.
 - [x] Sanitizar markdown com `rehype-sanitize`
 - [x] Criar script Node.js de geracao de artigos (IA -> Supabase)
 - [x] Criar script de agendamento automatico (schedule-articles.ts)
-- [ ] Popular dados reais (40 artigos) — 19 criados (9 published, 10 scheduled), quota Gemini free = 10/dia
+- [x] Popular dados reais — 69 artigos (45 published, 24 scheduled)
 - [x] Configurar cron na Vercel (/api/cron/publish) — 1x/dia (Hobby plan)
 - [x] Configurar Vercel Analytics
 - [x] Front-end: design system, layout, category/tag pages, hero images
-- [x] Google Search Console — verificado, sitemap submetido
-- [ ] Comprar dominio personalizado
-- [ ] Configurar CloudFlare ou DNS
-- [ ] Aplicar para Google AdSense (quando ~30 artigos + tráfego)
+- [x] Google Search Console — verificado, sitemap submetido, homepage indexada
+- [x] Comprar dominio personalizado (techsetup.site — $1.99/ano primeiro ano)
+- [x] Configurar DNS via Vercel
+- [x] Aplicar para Google AdSense — verificacao concluida (meta tag), em revisao
 - [x] Fix BOM issue em env vars do Vercel
 - [x] Home page: force-dynamic (resolveu fetch vazio no build)
 - [x] Imagens externas: domínios autorizados no next.config.ts
 - [x] Criar instrucoes.md com guia completo de uso
+- [ ] Aguardar aprovacao do Google AdSense
+- [ ] Adicionar script AdSense (next/script lazyOnload) apos aprovacao
+- [ ] Monitorar tráfego orgânico e indexação no GSC
