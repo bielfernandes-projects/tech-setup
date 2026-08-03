@@ -33,11 +33,13 @@ const categoryDescriptions: Record<string, string> = {
   troubleshooting: "Step-by-step guides to diagnose and fix common developer issues with software, hardware, and network configurations.",
   "discord-bots": "Tutorials for building, deploying, and managing Discord bots with Node.js, discord.js, and slash commands.",
   "windows-setup": "Guides for configuring Windows development environments, from WSL to terminal setup and driver management.",
-  windows: "Tips, tricks, and deep-dives into Windows for developers — from power user tools to system optimization.",
   "ai-development": "Practical guides for building with AI — RAG pipelines, prompt engineering, LLM integration, and vibe coding.",
   linux: "Linux server administration, Docker setup, and command-line workflows for developers.",
   devops: "CI/CD pipelines, container orchestration, deployment automation, and infrastructure best practices.",
   "home-automation": "Smart home dashboards, Home Assistant setup, IoT integrations, and home automation workflows.",
+  automation: "Workflow automation with n8n, Make.com, Power Automate, and API integration guides for developers.",
+  web3: "Smart contracts, Ethereum tooling, and decentralized application development for web developers.",
+  programming: "Programming language guides, tooling, and code quality practices for everyday development.",
 };
 
 export default async function CategoryPage({

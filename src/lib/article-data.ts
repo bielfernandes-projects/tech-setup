@@ -7,6 +7,9 @@ import {
   Terminal,
   Settings,
   Home,
+  Workflow,
+  Blocks,
+  Braces,
 } from "lucide-react";
 
 export const categoryMeta: Record<
@@ -28,11 +31,6 @@ export const categoryMeta: Record<
       "Configuring Windows dev environments — WSL, terminals, drivers.",
     Icon: Monitor,
   },
-  windows: {
-    description:
-      "Tips, tricks, and deep-dives into Windows for developers.",
-    Icon: Monitor,
-  },
   "ai-development": {
     description:
       "Building with AI — RAG pipelines, prompt engineering, vibe coding.",
@@ -47,6 +45,21 @@ export const categoryMeta: Record<
     description:
       "CI/CD pipelines, container orchestration, and deployment automation.",
     Icon: Settings,
+  },
+  automation: {
+    description:
+      "Workflow automation with n8n, Make, and Power Automate.",
+    Icon: Workflow,
+  },
+  web3: {
+    description:
+      "Smart contracts, Ethereum tooling, and decentralized apps.",
+    Icon: Blocks,
+  },
+  programming: {
+    description:
+      "Language guides, tooling, and code quality for everyday development.",
+    Icon: Braces,
   },
   "home-automation": {
     description:

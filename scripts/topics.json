@@ -1,445 +1,144 @@
 {
   "topics": [
     {
-      "topic": "Setting up WSL2 with Ubuntu on Windows 11",
-      "category": "Windows Setup",
-      "tags": [
-        "wsl",
-        "ubuntu",
-        "windows-11"
-      ]
-    },
-    {
-      "topic": "How to set up a Minecraft server on Windows",
-      "category": "Windows Setup",
-      "tags": [
-        "minecraft",
-        "server",
-        "windows"
-      ]
-    },
-    {
-      "topic": "Discord screen share not working — fix it now",
-      "category": "Troubleshooting",
-      "tags": [
-        "discord",
-        "screen-share",
-        "troubleshooting"
-      ]
-    },
-    {
-      "topic": "How to use npm and npx effectively in 2026",
-      "category": "Software Config",
-      "tags": [
-        "npm",
-        "nodejs",
-        "tools"
-      ]
-    },
-    {
       "topic": "Fix black screen after Windows update",
       "category": "Troubleshooting",
-      "tags": [
-        "windows",
-        "update",
-        "troubleshooting"
-      ]
-    },
-    {
-      "topic": "How to set up Docker Desktop on Windows 11 with WSL2",
-      "category": "Windows Setup",
-      "tags": [
-        "docker",
-        "wsl",
-        "windows-11",
-        "containers"
-      ]
-    },
-    {
-      "topic": "Debugging Node.js applications with Chrome DevTools",
-      "category": "Software Config",
-      "tags": [
-        "nodejs",
-        "debugging",
-        "chrome",
-        "devtools"
-      ]
-    },
-    {
-      "topic": "How to configure Git on Windows for development",
-      "category": "Windows Setup",
-      "tags": [
-        "git",
-        "windows",
-        "setup"
-      ]
-    },
-    {
-      "topic": "Fix high CPU usage on Windows 11 — developer guide",
-      "category": "Troubleshooting",
-      "tags": [
-        "windows-11",
-        "cpu",
-        "performance"
-      ]
-    },
-    {
-      "topic": "Setting up PostgreSQL on Windows 11 for local development",
-      "category": "Windows Setup",
-      "tags": [
-        "postgresql",
-        "windows",
-        "database"
-      ]
-    },
-    {
-      "topic": "How to create a Discord bot dashboard with Next.js",
-      "category": "Discord Bots",
-      "tags": [
-        "discord",
-        "nextjs",
-        "bots",
-        "dashboard"
-      ]
-    },
-    {
-      "topic": "Fix VS Code not detecting TypeScript errors",
-      "category": "Software Config",
-      "tags": [
-        "vscode",
-        "typescript",
-        "troubleshooting"
-      ]
-    },
-    {
-      "topic": "How to use Windows Terminal profiles for dev environments",
-      "category": "Windows Setup",
-      "tags": [
-        "windows-terminal",
-        "profiles",
-        "setup"
-      ]
-    },
-    {
-      "topic": "Fix Docker container not starting on Windows 11",
-      "category": "Troubleshooting",
-      "tags": [
-        "docker",
-        "windows-11",
-        "containers",
-        "troubleshooting"
-      ]
-    },
-    {
-      "topic": "Setting up a Node.js project with ESLint and Prettier in 2026",
-      "category": "Software Config",
-      "tags": [
-        "nodejs",
-        "eslint",
-        "prettier",
-        "setup"
-      ]
-    },
-    {
-      "topic": "How to speed up npm install on Windows",
-      "category": "Software Config",
-      "tags": [
-        "npm",
-        "windows",
-        "performance",
-        "caching"
-      ]
-    },
-    {
-      "topic": "Fix Windows Search not working after update",
-      "category": "Troubleshooting",
-      "tags": [
-        "windows",
-        "search",
-        "update",
-        "troubleshooting"
-      ]
-    },
-    {
-      "topic": "How to set up a React development environment on Windows 11",
-      "category": "Windows Setup",
-      "tags": [
-        "react",
-        "windows-11",
-        "setup",
-        "javascript"
-      ]
+      "tags": ["windows-11", "troubleshooting", "display", "black-screen"]
     },
     {
       "topic": "Creating a Discord bot that moderates channels automatically",
       "category": "Discord Bots",
-      "tags": [
-        "discord",
-        "bots",
-        "moderation",
-        "auto-mod"
-      ]
+      "tags": ["discord", "nodejs", "moderation", "bots"]
     },
     {
       "topic": "How to configure Windows Firewall for Node.js servers",
       "category": "Windows Setup",
-      "tags": [
-        "windows",
-        "firewall",
-        "nodejs",
-        "networking"
-      ]
+      "tags": ["windows", "nodejs", "firewall", "networking"]
     },
     {
       "topic": "Fix Bluetooth audio not working on Windows 11",
       "category": "Troubleshooting",
-      "tags": [
-        "bluetooth",
-        "audio",
-        "windows-11"
-      ]
+      "tags": ["windows-11", "troubleshooting", "bluetooth", "audio"]
     },
     {
       "topic": "How to use Supabase with Next.js in 2026",
-      "category": "Software Config",
-      "tags": [
-        "supabase",
-        "nextjs",
-        "database"
-      ]
+      "category": "Programming",
+      "tags": ["supabase", "nextjs", "programming", "authentication"]
     },
     {
       "topic": "Setting up a monorepo with Turborepo and npm workspaces",
-      "category": "Software Config",
-      "tags": [
-        "turborepo",
-        "monorepo",
-        "npm"
-      ]
+      "category": "Programming",
+      "tags": ["nodejs", "monorepo", "turborepo", "npm", "programming"]
     },
     {
       "topic": "Fix Windows 11 sleep mode waking up randomly",
       "category": "Troubleshooting",
-      "tags": [
-        "windows-11",
-        "sleep",
-        "power",
-        "troubleshooting"
-      ]
+      "tags": ["windows-11", "troubleshooting", "sleep-mode", "power"]
     },
     {
       "topic": "How to build a CLI tool with Node.js and Commander.js",
-      "category": "Software Config",
-      "tags": [
-        "nodejs",
-        "cli",
-        "commander",
-        "tools"
-      ]
+      "category": "Programming",
+      "tags": ["nodejs", "cli", "commander", "programming"]
     },
     {
       "topic": "How to set up Nginx as reverse proxy on Windows with WSL2",
       "category": "Windows Setup",
-      "tags": [
-        "nginx",
-        "wsl",
-        "reverse-proxy"
-      ]
+      "tags": ["windows", "wsl2", "nginx", "reverse-proxy"]
     },
     {
       "topic": "Fix Git merge conflicts in VS Code — step by step",
-      "category": "Software Config",
-      "tags": [
-        "git",
-        "vscode",
-        "merge",
-        "conflicts"
-      ]
+      "category": "Troubleshooting",
+      "tags": ["git", "vscode", "merge-conflicts", "troubleshooting"]
     },
     {
       "topic": "How to use environment variables in Node.js properly",
-      "category": "Software Config",
-      "tags": [
-        "nodejs",
-        "env",
-        "dotenv",
-        "configuration"
-      ]
+      "category": "Programming",
+      "tags": ["nodejs", "environment-variables", "dotenv", "programming"]
     },
     {
       "topic": "Setting up GitHub Actions CI/CD for a Next.js project",
-      "category": "Software Config",
-      "tags": [
-        "github-actions",
-        "nextjs",
-        "ci-cd",
-        "deployment"
-      ]
+      "category": "DevOps",
+      "tags": ["github-actions", "ci/cd", "nextjs", "devops"]
     },
     {
       "topic": "Fix audio crackling on Windows 11 with multiple audio devices",
       "category": "Troubleshooting",
-      "tags": [
-        "audio",
-        "windows-11",
-        "crackling",
-        "devices"
-      ]
+      "tags": ["windows-11", "troubleshooting", "audio", "devices"]
     },
     {
       "topic": "Optimizing WSL2 Performance for Large-Scale Node.js Monorepos",
       "category": "Windows Setup",
-      "tags": [
-        "WSL2",
-        "Node.js",
-        "Windows",
-        "Performance",
-        "Development"
-      ]
+      "tags": ["wsl2", "windows", "nodejs", "performance", "monorepo"]
     },
     {
       "topic": "Securing Your Discord Bot: Best Practices for API Key and Environment Variable Management",
       "category": "Discord Bots",
-      "tags": [
-        "Discord.js",
-        "Security",
-        "Environment Variables",
-        "Best Practices",
-        "API"
-      ]
+      "tags": ["discord", "bots", "security", "environment-variables"]
     },
     {
       "topic": "Automating Discord Server Moderation with Custom Node.js Webhooks",
       "category": "Discord Bots",
-      "tags": [
-        "Discord",
-        "Automation",
-        "Node.js",
-        "Webhooks",
-        "DevOps"
-      ]
+      "tags": ["discord", "nodejs", "webhooks", "moderation"]
     },
     {
       "topic": "Fixing 'Discord Gateway Intents' Errors in Node.js Development",
-      "category": "Troubleshooting",
-      "tags": [
-        "Discord.js",
-        "Troubleshooting",
-        "Node.js",
-        "Gateway Intents",
-        "API"
-      ]
+      "category": "Discord Bots",
+      "tags": ["discord", "nodejs", "gateway-intents", "troubleshooting"]
     },
     {
       "topic": "Hardening a Windows-Based Dedicated Game Server: Network Configuration and Resource Limits",
-      "category": "Software Config",
-      "tags": [
-        "Gaming Servers",
-        "Windows",
-        "Networking",
-        "Server Config",
-        "Admin"
-      ]
+      "category": "Windows Setup",
+      "tags": ["windows", "game-server", "networking", "security"]
     },
     {
       "topic": "Kubernetes for Beginners: Deploy Your First App",
       "category": "DevOps",
-      "tags": [
-        "kubernetes",
-        "containers",
-        "devops",
-        "deployment"
-      ]
+      "tags": ["kubernetes", "devops", "deployment", "containers"]
     },
     {
       "topic": "TypeScript Generics: A Practical Guide",
-      "category": "Software Config",
-      "tags": [
-        "typescript",
-        "generics",
-        "javascript",
-        "programming"
-      ]
+      "category": "Programming",
+      "tags": ["typescript", "generics", "programming"]
     },
     {
       "topic": "PostgreSQL Performance Tuning for Developers",
-      "category": "Software Config",
-      "tags": [
-        "postgresql",
-        "database",
-        "performance",
-        "sql"
-      ]
+      "category": "Programming",
+      "tags": ["postgresql", "performance", "database", "programming"]
     },
     {
       "topic": "GitHub Actions: Build a CI/CD Pipeline from Scratch",
       "category": "DevOps",
-      "tags": [
-        "github-actions",
-        "ci-cd",
-        "automation",
-        "deployment"
-      ]
+      "tags": ["github-actions", "ci/cd", "devops"]
     },
     {
       "topic": "Linux Command Line: 50 Essential Commands",
       "category": "Linux",
-      "tags": [
-        "linux",
-        "command-line",
-        "terminal",
-        "productivity"
-      ]
+      "tags": ["linux", "cli", "terminal", "commands"]
     },
     {
       "topic": "React Server Components: Complete Guide for 2026",
-      "category": "Software Config",
-      "tags": [
-        "react",
-        "server-components",
-        "nextjs",
-        "frontend"
-      ]
+      "category": "Programming",
+      "tags": ["react", "server-components", "nextjs", "programming"]
     },
     {
       "topic": "Nginx Reverse Proxy: Setup and Configuration Guide",
       "category": "DevOps",
-      "tags": [
-        "nginx",
-        "reverse-proxy",
-        "web-server",
-        "linux"
-      ]
+      "tags": ["nginx", "reverse-proxy", "devops", "configuration"]
     },
     {
       "topic": "Wireshark Network Analysis: Beginner to Intermediate",
-      "category": "Software Config",
-      "tags": [
-        "wireshark",
-        "networking",
-        "debugging",
-        "security"
-      ]
+      "category": "DevOps",
+      "tags": ["wireshark", "networking", "analysis", "devops"]
     },
     {
       "topic": "Terraform Basics: Infrastructure as Code for Beginners",
       "category": "DevOps",
-      "tags": [
-        "terraform",
-        "infrastructure",
-        "cloud",
-        "devops"
-      ]
+      "tags": ["terraform", "infrastructure-as-code", "devops", "aws"]
     },
     {
       "topic": "WebSocket vs Server-Sent Events: When to Use Each",
-      "category": "Software Config",
-      "tags": [
-        "websockets",
-        "sse",
-        "real-time",
-        "api"
-      ]
+      "category": "Programming",
+      "tags": ["websocket", "server-sent-events", "programming", "real-time"]
     }
   ]
 }

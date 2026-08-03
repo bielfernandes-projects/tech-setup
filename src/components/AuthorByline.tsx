@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { site } from "@/lib/site";
 
 interface AuthorBylineProps {
@@ -22,9 +23,19 @@ export default function AuthorByline({
         TS
       </div>
       <div>
-        <p className="text-sm font-medium text-ink">{site.author.name}</p>
+        <p className="text-sm font-medium text-ink">
+          <Link href="/about" className="hover:text-primary transition-colors">
+            {site.author.name}
+          </Link>
+        </p>
         <p className="text-xs text-muted">
-          Reviewed {formatted}
+          Published {formatted} ·{" "}
+          <Link
+            href="/editorial-policy"
+            className="hover:text-primary transition-colors"
+          >
+            Editorial policy
+          </Link>
         </p>
       </div>
     </div>

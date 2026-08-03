@@ -47,11 +47,12 @@ export async function GET(request: NextRequest) {
     }
 
     const slugs = articles.map((a) => a.slug);
-    const now = new Date().toISOString();
 
+    // Preserve the scheduled published_at (randomized time of day) — do not
+    // stamp the cron run time on top of it.
     const { error: updateError } = await getAdmin()
       .from("articles")
-      .update({ status: "published", published_at: now })
+      .update({ status: "published" })
       .in("slug", slugs);
 
     if (updateError) {

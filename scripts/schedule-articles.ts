@@ -2,13 +2,13 @@
 /**
  * scripts/schedule-articles.ts
  *
- * Schedules up to N articles (default 3) per day.
- * Prioritizes articles with hero images.
- * Fills existing days before moving to the next.
+ * Schedules up to N articles (default 1) per day, one per calendar day,
+ * each at a randomized time of day so the publishing cadence looks organic.
+ * Prioritizes articles with hero images. Fills the next free day.
  *
  * Usage:
- *   npx tsx scripts/schedule-articles.ts              # schedule up to 3
- *   npx tsx scripts/schedule-articles.ts --count 5    # schedule up to 5
+ *   npx tsx scripts/schedule-articles.ts              # schedule up to 1/day
+ *   npx tsx scripts/schedule-articles.ts --count 3    # schedule up to 3 (still 1/day)
  *   npx tsx scripts/schedule-articles.ts --dry-run    # simulate only
  */
 
@@ -35,7 +35,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const countIdx = args.indexOf("--count");
-const maxArticles = countIdx !== -1 ? parseInt(args[countIdx + 1]) || 3 : 3;
+const maxArticles = countIdx !== -1 ? parseInt(args[countIdx + 1]) || 1 : 1;
+
+const MAX_PER_DAY = 1;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -45,11 +47,17 @@ function toStartOfDayUTC(date: Date): Date {
   return d;
 }
 
-function formatDateUTC(date: Date): string {
+// Random publish time between 06:00 and 22:59 UTC — avoids the mechanical
+// "everything at midnight" look.
+function randomTimeISO(date: Date): string {
   const y = date.getUTCFullYear();
   const m = String(date.getUTCMonth() + 1).padStart(2, "0");
   const d = String(date.getUTCDate()).padStart(2, "0");
-  return `${y}-${m}-${d}T00:00:00+00:00`;
+  const hour = 6 + Math.floor(Math.random() * 17); // 06–22
+  const minute = Math.floor(Math.random() * 60); // 00–59
+  const hh = String(hour).padStart(2, "0");
+  const mm = String(minute).padStart(2, "0");
+  return `${y}-${m}-${d}T${hh}:${mm}:00+00:00`;
 }
 
 function formatDateShort(date: Date): string {
@@ -112,15 +120,18 @@ async function main() {
   const slots: { date: Date; iso: string }[] = [];
   let candidateDay = tomorrow;
 
-  // Walk days forward until we have enough slots for all articles
-  // Each day can hold up to 3 articles total
+  // Walk days forward until we have enough slots for all articles.
+  // Each day can hold up to MAX_PER_DAY articles total.
   while (slots.length < toSchedule.length) {
     const dayStr = formatDateShort(candidateDay);
     const count = dayCounts.get(dayStr) ?? 0;
-    const availableSlots = Math.max(0, 3 - count);
+    const availableSlots = Math.max(0, MAX_PER_DAY - count);
 
     for (let i = 0; i < availableSlots && slots.length < toSchedule.length; i++) {
-      slots.push({ date: new Date(candidateDay), iso: formatDateUTC(candidateDay) });
+      slots.push({
+        date: new Date(candidateDay),
+        iso: randomTimeISO(candidateDay),
+      });
     }
 
     candidateDay = addDays(candidateDay, 1);

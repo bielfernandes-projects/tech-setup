@@ -49,9 +49,9 @@ const genAI = new GoogleGenerativeAI(GEMINI_KEY!);
 
 const TOPICS_PATH = path.resolve(__dirname, "topics.json");
 
-const REFILL_PROMPT = `Generate {count} new article topic ideas for "Tech Setup", a faceless niche blog targeting Tier-1 developers (US/EU).
+const REFILL_PROMPT = `Generate {count} new article topic ideas for "Tech Setup", a niche blog for developers (US/EU).
 
-Topics should cover: Discord (troubleshooting, bots), Windows development setup, Node.js, developer tools, gaming servers.
+Topics should cover: Windows development setup, Node.js tooling, Discord bots, AI coding tools, DevOps, automation (n8n/Make), web3, home automation.
 
 Return ONLY a valid JSON array — no markdown fences, no explanation:
 [
@@ -59,10 +59,11 @@ Return ONLY a valid JSON array — no markdown fences, no explanation:
 ]
 
 Rules:
-- Write in English, specific and actionable topics
-- Categories: Troubleshooting, Discord Bots, Windows Setup, Software Config
+- Write in English; topics must be specific and answerable (a concrete problem or task), not generic ("The Complete Guide to X").
+- Categories (exact): Troubleshooting, Windows Setup, Discord Bots, AI & Development, Programming, Automation, Web3, DevOps, Linux, Home Automation
 - 3-5 tags per topic
-- Do NOT repeat topics already present in the current topics.json file`;
+- Do NOT repeat topics already present in the current topics.json file
+- Avoid topics that would naturally produce a title ending in "A Developer's Guide" or "Ultimate Guide" — prefer question or outcome titles.`;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -142,19 +143,24 @@ async function generateWithGemini(topic: string): Promise<GeneratedArticle> {
   const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
 
   // Step 1: Generate title + excerpt as small JSON (reliable to parse)
-  const metaPrompt = `You are a technical writer for "Tech Setup", a faceless niche blog targeting Tier-1 developers (US/EU).
+  const metaPrompt = `You are a technical writer for "Tech Setup", a niche blog for developers (US/EU).
 
-Generate a SEO-optimized title and meta description for an article about: "${topic}"
+Generate an SEO title and meta description for an article about: "${topic}"
 
 Rules:
 - Write in English
-- Title: 50-60 chars, includes primary keyword
-- Excerpt: 150-160 chars, compelling for search results
+- Title: 45-70 chars, includes the primary keyword, and AVOID clichéd suffixes
+  such as ": A Developer's Guide", ": The Ultimate Guide", "Mastering X",
+  "X in 2026", or "Step-by-Step". Prefer question titles ("Why is X...?",
+  "X not working?"), outcome titles ("Fix X in Y minutes"), or concrete
+  how-to titles with a specific result.
+- Excerpt: 150-160 chars, states the concrete outcome the reader gets and
+  the audience it is for — no marketing fluff.
 - Return ONLY valid JSON, no markdown fences
 
 Return exactly this JSON:
 {
-  "title": "Your SEO title here",
+  "title": "Your title here",
   "excerpt": "Your meta description here"
 }`;
 
@@ -181,18 +187,33 @@ Return exactly this JSON:
   }
 
   // Step 2: Generate content as plain Markdown (no JSON wrapping)
-  const contentPrompt = `You are a technical writer for "Tech Setup", a faceless niche blog targeting Tier-1 developers (US/EU).
+  const contentPrompt = `You are a technical writer for "Tech Setup", a niche blog for developers (US/EU).
 
 Write a complete article about: "${topic}"
 
 Title: ${metaResult!.title}
 
+Before writing, decide ONE concrete reader scenario: who the reader is, what
+they are trying to do, and what usually blocks them. Every section of the
+article should serve that scenario.
+
 Rules:
-- Write in English, helpful and direct tone
-- Structure with ## and ### headings
-- Include practical steps, commands in \`\`\` code blocks, lists
-- 1200-1800 words
-- Return ONLY the Markdown article body — no title, no JSON, no wrapping`;
+- Write in English, direct and practical tone. Address the reader as "you".
+  No "In this article, we will explore" openers — start with the problem or
+  the outcome.
+- Open with a short, heading-free intro (2-3 sentences): the problem, who it
+  hits, and what the reader ends up with.
+- Structure with ## and ### headings, but VARY the pattern per article.
+  Do not always open with "Prerequisites". Useful building blocks to choose
+  from: a quick TL;DR fix up front, exact commands in \`\`\` code blocks with
+  expected output, a short "If this doesn't work" section with the 2-3 most
+  common failure points, and a closing note on alternatives or prevention.
+- Be concrete: exact commands, file names, package names, flags, and
+  version-relevant caveats. Never hand-wave a step as "and then configure
+  it" — say what to set and why.
+- Avoid generic filler sentences and repeated transitional phrases.
+- 1200-1800 words.
+- Return ONLY the Markdown article body — no title, no JSON, no wrapping.`;
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
@@ -283,6 +304,27 @@ async function searchUnsplashImage(query: string): Promise<string> {
   return data.results[0].urls.raw;
 }
 
+async function fetchHeroImage(
+  topic: string,
+  categoryName: string,
+  slug: string,
+): Promise<string> {
+  const queries = [topic, categoryName, "developer workspace technology"];
+  let lastError: Error | null = null;
+
+  for (const query of queries) {
+    try {
+      const unsplashUrl = await searchUnsplashImage(query);
+      return await downloadAndUpload(unsplashUrl, slug);
+    } catch (err) {
+      lastError = err as Error;
+      console.log(`   ⚠️  Unsplash "${query}" failed: ${lastError.message}`);
+    }
+  }
+
+  throw lastError ?? new Error("Hero image fetch failed");
+}
+
 async function downloadAndUpload(
   url: string,
   slug: string,
@@ -334,14 +376,14 @@ async function createArticle(
 
   console.log(`   ✅ Generated: "${generated.title}"`);
 
-  // 3. Fetch hero image from Unsplash
-  let heroUrl: string | null = null;
+  // 3. Fetch hero image from Unsplash — mandatory
+  let heroUrl: string;
   try {
-    const unsplashUrl = await searchUnsplashImage(topic);
-    heroUrl = await downloadAndUpload(unsplashUrl, slug);
+    heroUrl = await fetchHeroImage(topic, categoryName, slug);
     console.log(`   🖼️  Hero uploaded`);
   } catch (err) {
-    console.log(`   ⚠️  Hero image skipped: ${(err as Error).message}`);
+    console.log(`   ❌ Hero image required — article NOT created: ${(err as Error).message}`);
+    throw new Error(`Hero image required: ${(err as Error).message}`);
   }
 
   // 4. Upsert category and tags

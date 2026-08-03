@@ -49,9 +49,10 @@ export interface ArticleRepository {
   listCategorySlugs(): Promise<string[]>;
 
   /**
-   * List all tag slugs.
+   * List tag slugs that are attached to at least `minPublished` published
+   * articles. Thin tag pages are excluded from the sitemap and static build.
    */
-  listTagSlugs(): Promise<string[]>;
+  listTagSlugs(minPublished?: number): Promise<string[]>;
 
   /**
    * Resolve a category by slug.

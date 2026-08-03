@@ -70,6 +70,7 @@ const footerLinks = [
   { href: "/terms", label: "Terms" },
   { href: "/cookie-policy", label: "Cookies" },
   { href: "/dmca", label: "DMCA" },
+  { href: "/editorial-policy", label: "Editorial Policy" },
 ];
 
 const footerCategories = [

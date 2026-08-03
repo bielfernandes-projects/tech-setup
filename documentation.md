@@ -64,6 +64,7 @@
 | `/blog/category/[slug]` | SSG (ISR) | Lista artigos por categoria + CollectionPage JSON-LD + breadcrumbs |
 | `/blog/tag/[slug]` | SSG (ISR) | Lista artigos por tag + CollectionPage JSON-LD + breadcrumbs |
 | `/about` | Static | About + E-E-A-T + AboutPage JSON-LD + canonical |
+| `/editorial-policy` | Static | Política editorial honesta (IA assistida, revisão, correções) + canonical |
 | `/contact` | Static | Contato + canonical |
 | `/privacy-policy` | Static | Privacidade + canonical |
 | `/terms` | Static | Termos de uso + canonical |
@@ -81,7 +82,7 @@
 - Footer: 4-column grid (Site / Categories / Legal / Tagline) — "Built for developers who debug for a living"
 - Single column, max-width 48rem (3xl), except artigo page (6xl com sidebar TOC)
 - Home: hero com H1 + subheadline + métricas ("X guides published · Y topics covered") + category chips + featured article + category grid + latest articles list. **Featured** é sempre o artigo mais recente (por `published_at desc`). Não há flag `is_featured` no banco — é dinâmico. Artigos novos viram featured por ~24h. Para controle editorial manual, considerar coluna `is_featured` + método `findFeatured()` no repository.
-- Artigo: reading progress bar (1px top) + breadcrumbs (aria-current) + author byline (avatar + "Reviewed {date}") + reading time + last updated badge + content + tags + related articles (com miniatura) + lateral TOC (desktop)
+- Artigo: reading progress bar (1px top) + breadcrumbs (aria-current) + author byline (avatar + "Published {date}" + link Editorial Policy) + reading time + last updated badge + content + tags + related articles (com miniatura) + lateral TOC (desktop)
 - Hero image (next/image, priority, 16:9 ratio)
 - Empty state: centered message
 - 404: minimal with back-to-home CTA
@@ -109,6 +110,7 @@ src/
 │   │   ├── category/[slug]/page.tsx
 │   │   └── tag/[slug]/page.tsx
 │   ├── about/page.tsx
+│   ├── editorial-policy/page.tsx
 │   ├── contact/page.tsx
 │   ├── cookie-policy/page.tsx
 │   ├── dmca/page.tsx
@@ -125,7 +127,7 @@ src/
 │   └── sitemap.ts
 ├── components/
 │   ├── ArticleCard.tsx        # Card reutilizável pra listas de artigos
-│   ├── AuthorByline.tsx       # Avatar + nome + "Reviewed {date}"
+│   ├── AuthorByline.tsx       # Avatar + nome + "Published {date}" + link Editorial Policy
 │   ├── CategoryChips.tsx      # Pills horizontais de categorias
 │   ├── CategoryGrid.tsx       # Grid 2x4 de categorias com emoji + descrição
 │   ├── FeaturedArticle.tsx    # Card grande pra artigo em destaque na home
@@ -151,7 +153,12 @@ scripts/
 ├── create-15-articles.ts    # Inserção manual (sem IA)
 ├── check-db.ts              # Verificação do estado do banco
 ├── clean-topics.ts          # Limpeza de topics.json
-├── schedule-articles.ts     # Agendamento automático
+├── schedule-articles.ts     # Agendamento automático (1/dia, horário aleatório)
+├── dedupe-articles.ts       # Dedupe: Levenshtein ≤1 + Díce-Sørensen ≥0.6
+├── consolidate-categories.ts# Merge de categorias duplicadas
+├── split-software-config.ts # Split da categoria "Software Config" removida
+├── prune-tags.ts            # Poda de tags com <3 artigos publicados
+├── reschedule-scheduled.ts  # Reagenda 1/dia preservando ordem
 ├── gem-instruction.md       # Instrução GEM
 └── topics.json              # Pool de tópicos para geração
 ```
@@ -168,7 +175,7 @@ Todos em `src/components/`:
 | `FeaturedArticle` | Server | Card grande — hero image com gradient, "Featured" badge, reading time, CTA |
 | `CategoryChips` | Server | Pills horizontais — Lucide icon + nome + contagem |
 | `CategoryGrid` | Server | Grid 2x4 — Lucide icon com bg-primary/15 + nome + descrição + contagem |
-| `AuthorByline` | Server | Avatar "TS" + nome + "Reviewed {date}" |
+| `AuthorByline` | Server | Avatar "TS" + "Tech Setup" + "Published {date}" + link Editorial Policy |
 | `ReadingProgress` | Client | Barra 1px no topo — scroll progress com IntersectionObserver |
 | `TableOfContents` | Client | TOC lateral (xl+) — IntersectionObserver + heading highlighting |
 
@@ -177,7 +184,7 @@ Todos em `src/components/`:
 - `src/lib/articles/repository.ts` define a interface `ArticleRepository` — a única superfície que as páginas conhecem.
 - `src/lib/articles/supabase-adapter.ts` implementa a interface com queries Supabase + normalização.
 - Todas as páginas usam `articleRepository` exportado de `src/lib/articles`. O schema do banco fica isolado no adapter.
-- Métodos: `findPublished`, `findBySlug`, `findByCategory`, `findByTag`, `findRelated`, `listPublishedSlugs`, `listCategories` (com counts), `listCategorySlugs`, `listTagSlugs`, `findCategoryBySlug`, `findTagBySlug`.
+- Métodos: `findPublished`, `findBySlug`, `findByCategory`, `findByTag`, `findRelated`, `listPublishedSlugs`, `listCategories` (com counts), `listCategorySlugs`, `listTagSlugs(minPublished=3)` (filtra tags com ≥3 publicados via `articles!inner`), `findCategoryBySlug`, `findTagBySlug`.
 - Antigo `src/lib/mdx.ts` removido (era uma coleção de 12 funções thin wrappers).
 
 ### Site Constants
@@ -198,6 +205,7 @@ Todos em `src/components/`:
 - **Uso refill:** `npx tsx scripts/generate-article.ts --refill N` (gera novos tópicos no topics.json)
 - **Uso batch+refill:** `npx tsx scripts/generate-article.ts --batch --limit 10 --refill 5`
 - **Fluxo:** Gemini gera Markdown (2 chamadas: meta + content) → Unsplash busca hero → Supabase Storage → DB como draft
+- **Hero image obrigatória:** falha no Unsplash (com fallback de queries: tópico → categoria → "developer workspace technology") aborta o artigo — nunca salva draft sem imagem
 - **Auto-consumo:** Tópicos são removidos do topics.json após uso bem-sucedido
 - **Auto-refill:** `--refill N` gera novos tópicos via Gemini ao final do batch
 - **Quota:** Gemini free tier por modelo, varia entre 20-1500 req/dia
@@ -218,9 +226,40 @@ Todos em `src/components/`:
 - **Local:** `scripts/schedule-articles.ts`
 - **Uso:** `npx tsx scripts/schedule-articles.ts`
 - **Dry run:** `npx tsx scripts/schedule-articles.ts --dry-run`
-- **Count:** `npx tsx scripts/schedule-articles.ts --count 5`
-- **Fluxo:** Seleciona drafts com hero image → agenda até 3/dia → preenche dias com <3 antes de partir pro próximo
-- **Regras:** Só agenda artigos com `hero_image_url`, ordena por `created_at` ASC (mais antigos primeiro)
+- **Count:** `npx tsx scripts/schedule-articles.ts --count 1`
+- **Fluxo:** Seleciona drafts com hero image → agenda **1/dia** (`MAX_PER_DAY=1`) com **horário aleatório 06:00–22:59 UTC** → preenche dias com <1 antes de partir pro próximo
+- **Regras:** Só agenda artigos com `hero_image_url`, ordena por `created_at` ASC (mais antigos primeiro). Cadência de 1 artigo/dia decidida pelo dono pós-rejeição AdSense (sinal de frescor/editorial).
+
+### Dedupe de Artigos (pós-rejeição AdSense)
+
+- **Local:** `scripts/dedupe-articles.ts`
+- **Uso:** `npx tsx scripts/dedupe-articles.ts --apply`
+- **Fluxo:** Compara pares de artigos; fuzzyEqual (Levenshtein ≤1, robusto a stemmer) + similaridade Díce-Sørensen (`shared/(a+b-shared) ≥ 0.6`) + guard de token-único (exige token idêntico entre títulos). `--apply` despublica o não-canônico (`status='draft'`, reversível)
+- **Resultado:** 23 artigos despublicados (1ª rodada 18 em 12 grupos, 2ª rodada 4 via script, 1 manual — npm/npx Guide 2026)
+
+### Consolidação de Categorias
+
+- **Local:** `scripts/consolidate-categories.ts`
+- **Uso:** `npx tsx scripts/consolidate-categories.ts --apply`
+- **Fluxo:** Merge de categorias duplicadas: `windows`→`windows-setup`, `iot`→`home-automation`, `vibecoding`→`ai-development`
+
+### Split de Software Config
+
+- **Local:** `scripts/split-software-config.ts`
+- **Uso:** `npx tsx scripts/split-software-config.ts --apply`
+- **Fluxo:** `software-config` (bucket genérico, 38 artigos) foi deletada e redistribuída: `programming` (14), `ai-development` (11), `automation` (8), `web3` (4), `devops` (1). Restam **10 categorias**.
+
+### Poda de Tags
+
+- **Local:** `scripts/prune-tags.ts`
+- **Uso:** `npx tsx scripts/prune-tags.ts --apply`
+- **Fluxo:** Deleta tags com <3 artigos publicados; unifica `vibecoding`→`vibe-coding`. **Resultado:** 144 tags deletadas, restam 23. Afeta sitemap (tags fracas saem) e `generateStaticParams` (páginas órfãs não geradas).
+
+### Reschedule de Artigos Agendados
+
+- **Local:** `scripts/reschedule-scheduled.ts`
+- **Uso:** `npx tsx scripts/reschedule-scheduled.ts --apply`
+- **Fluxo:** Reagenda todos os `scheduled` para 1/dia preservando a ordem original. 22 agendados reajustados (06:00–22:59 UTC).
 
 ### Verificação do Banco
 
@@ -274,7 +313,7 @@ Todos em `src/components/`:
 - **Sitemap completo:** Home + artigos + categories + tags + páginas estáticas (about, contact, privacy, terms, cookies, dmca)
 - **Home page ISR:** `revalidate: 60` (substituiu force-dynamic)
 - **Breadcrumb navigation:** Visível em artigos, categories, tags
-- **Author byline:** "Tech Setup" como organização em todos os artigos — avatar "TS" + "Reviewed {date}"
+- **Author byline:** "Tech Setup" como organização em todos os artigos — avatar "TS" + "Published {date}" + link `/editorial-policy`
 - **Reading time:** Calculado (200 wpm) em artigos e featured article
 - **Last updated badge:** Mostrado se `updated_at > published_at + 7 dias`
 - **Table of Contents:** Lateral (desktop xl+) com IntersectionObserver, heading highlighting
@@ -286,16 +325,22 @@ Todos em `src/components/`:
 - **Footer expandido:** 4 colunas (Site, Categories, Legal, Tagline)
 - **Acessibilidade:** `:focus-visible` ring, `aria-current="page"` em breadcrumbs, contraste aprimorado (muted oklch 0.6)
 - **FAQ sections:** Adicionadas às top 3 páginas (WiFi, Discord Mic, Discord Bot) — schema FAQPage para rich results
-- **E-E-A-T:** About page expandida com quem somos, o que cobrimos, política editorial
+- **E-E-A-T (pós-rejeição):** /about reescrito como solo project honesto (sem "team of developers", sem "real hardware", sem nomes reais) + /editorial-policy criado com divulgação honesta de IA assistida, revisão, correções, publicidade e originalidade. Links no footer, byline, /about e sitemap. JSON-LD com `inLanguage: "en-US"`.
 
 ### Google AdSense
 
 - **Publisher ID:** `ca-pub-4704944043310509`
-- **Status:** Em revisão (verificação via meta tag concluída)
+- **Status:** ❌ **Rejeitado — "Conteúdo de baixo valor"** (notificação 2026-08-03)
 - **Verificação:** Meta tag `google-adsense-account` no `layout.tsx` (método alternativo — `<Script>` não funcionou)
 - **CSP:** Domínios AdSense autorizados em `next.config.ts` (`pagead2.googlesyndication.com`, `adservice.google.com`, `googleads.g.doubleclick.net`)
 - **Placeholders:** Removidos do layout do artigo — AdSense insere os próprios quando aprovado
 - **Script:** A adicionar após aprovação (via `next/script` `lazyOnload`)
+- **Plano de remediação (em execução):**
+  1. **Dedupe** — remover conteúdo duplicado/similar (23 despublicados)
+  2. **Taxonomia** — consolidar categorias (38→10) e podar tags (167→23)
+  3. **Cadência** — 1 artigo/dia com horário aleatório (frescor real)
+  4. **E-E-A-T honesto** — /about + /editorial-policy sem alucinações de autoridade
+  5. **Revisão** — só pedir nova revisão após tráfego orgânico consistente e todas as fases concluídas
 
 ### Imagens Externas (next/image)
 
@@ -351,18 +396,27 @@ Pra adicionar domínios: editar `next.config.ts` → `images.remotePatterns`.
 - [x] Sanitizar markdown com `rehype-sanitize`
 - [x] Criar script Node.js de geracao de artigos (IA -> Supabase)
 - [x] Criar script de agendamento automatico (schedule-articles.ts)
-- [x] Popular dados reais — 69 artigos (45 published, 24 scheduled)
+- [x] Popular dados reais — 105 artigos (60 published, 22 scheduled, 23 draft após dedupe)
 - [x] Configurar cron na Vercel (/api/cron/publish) — 1x/dia (Hobby plan)
-- [x] Configurar Vercel Analytics
+- [x] Vercel Analytics
 - [x] Front-end: design system, layout, category/tag pages, hero images
 - [x] Google Search Console — verificado, sitemap submetido, homepage indexada
 - [x] Comprar dominio personalizado (techsetup.site — $1.99/ano primeiro ano)
 - [x] Configurar DNS via Vercel
-- [x] Aplicar para Google AdSense — verificacao concluida (meta tag), em revisao
+- [x] Aplicar para Google AdSense — ❌ rejeitado "Conteúdo de baixo valor" (2026-08-03)
 - [x] Fix BOM issue em env vars do Vercel
 - [x] Home page: force-dynamic (resolveu fetch vazio no build)
 - [x] Imagens externas: domínios autorizados no next.config.ts
 - [x] Criar instrucoes.md com guia completo de uso
-- [ ] Aguardar aprovacao do Google AdSense
+- [x] Fase 1.1 Dedupe — 23 artigos despublicados (12 grupos + npm/npx)
+- [x] Fase 1.2 Categorias consolidadas — 38 → 10, software-config removida
+- [x] Fase 1.3 Poda de tags — 167 → 23 (minPublished=3 no sitemap)
+- [x] Fase 1.4 Cadência — 1/dia, horário aleatório 06:00–22:59 UTC, cron não sobrescreve published_at
+- [x] Fase 2.1 About reescrito (solo project honesto)
+- [x] Fase 2.2 /editorial-policy criado + links no footer/sitemap
+- [x] Fase 2.3 Byline "Published" + link editorial policy + inLanguage no JSON-LD
+- [x] Fase 3.1 Prompts de geração reforçados + topics.json atualizado (28 tópicos, categorias válidas)
+- [ ] Fase 3.2 Rodar geração com novos prompts (quando nova leva for necessária)
+- [ ] Aguardar tráfego orgânico consistente (GSC) antes de nova revisão AdSense
 - [ ] Adicionar script AdSense (next/script lazyOnload) apos aprovacao
 - [ ] Monitorar tráfego orgânico e indexação no GSC

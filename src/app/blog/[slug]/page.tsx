@@ -90,8 +90,9 @@ export default async function ArticlePage({
     "@type": "Article",
     headline: article.title,
     description: article.excerpt,
-    image: article.hero_image_url ?? `${siteUrl}/opengraph-image`,
+    image: article.hero_image_url ?? siteUrl("/opengraph-image"),
     url: siteUrl(`/blog/${article.slug}`),
+    inLanguage: "en-US",
     datePublished: article.published_at ?? article.created_at,
     dateModified:
       article.updated_at ?? article.published_at ?? article.created_at,
@@ -111,7 +112,7 @@ export default async function ArticlePage({
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `${siteUrl}/blog/${article.slug}`,
+      "@id": siteUrl(`/blog/${article.slug}`),
     },
     ...(article.category && {
       about: {
@@ -208,7 +209,9 @@ export default async function ArticlePage({
                 {article.title}
               </h1>
               <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-                <span>Tech Setup</span>
+                <Link href="/about" className="hover:text-primary transition-colors">
+                  Tech Setup
+                </Link>
                 <span aria-hidden="true">·</span>
                 <time dateTime={article.published_at ?? undefined}>
                   {new Date(

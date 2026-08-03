@@ -56,3 +56,34 @@ do Tech Setup — daí conteúdo em inglês.
 Bloco server-rendered com `min-height` reservado, no lugar onde o AdSense
 entrará após aprovação. Evita CLS quando o anúncio carrega e não causa
 hydration mismatch (vazio no momento da hidratação).
+
+### Dedupe
+
+Processo de identificar e neutralizar artigos duplicados ou demasiadamente
+similares. Critérios: Levenshtein ≤1 (robusto a stemmer) + similaridade
+Díce-Sørensen ≥0.6 + guard de token-único. Não-canônicos vão para `draft`
+(reversível), nunca são deletados.
+
+### Cadência Editorial
+
+Decisão pós-rejeição AdSense: no máximo **1 artigo publicado por dia**, com
+horário aleatório entre 06:00 e 22:59 UTC. Sinal de frescor real e curadoria,
+em vez de volume de fábrica.
+
+### Categoria saudável vs. Tag saudável
+
+Taxonomia pós-poda: categorias são canônicas (10); tags só aparecem no site
+(URLs, sitemap) se tiverem ≥3 artigos publicados. Tags fracas são podadas —
+evita páginas finas que reforçam o sinal de "conteúdo de baixo valor".
+
+### Editorial Policy
+
+Página que divulga honestamente como o conteúdo é produzido: IA assistida,
+revisão humana, política de correções, publicidade e originalidade. É a
+âncora de transparência do E-E-A-T do site faceless.
+
+### Conteúdo de Baixo Valor (Google)
+
+Motivo da rejeição do AdSense (2026-08-03). Sinal de site "de fábrica": pouco
+conteúdo original, duplicação, cadência artificial, taxonomia poluída. O plano
+de remediação (fases 1–4) ataca exatamente esses sinais.

@@ -243,14 +243,25 @@ export class SupabaseArticleRepository implements ArticleRepository {
     return (data ?? []).map((c) => c.slug);
   }
 
-  async listTagSlugs(): Promise<string[]> {
-    const { data, error } = await getClient().from("tags").select("slug");
+  async listTagSlugs(minPublished = 3): Promise<string[]> {
+    const { data: tags, error } = await getClient().from("tags").select("id, slug");
 
     if (error) {
       throw new ArticleRepositoryError("Failed to list tag slugs", error);
     }
 
-    return (data ?? []).map((t) => t.slug);
+    const slugs: string[] = [];
+    for (const tag of tags ?? []) {
+      const { count } = await getClient()
+        .from("article_tags")
+        .select("articles!inner(id)", { count: "exact", head: true })
+        .eq("tag_id", tag.id)
+        .eq("articles.status", "published");
+
+      if ((count ?? 0) >= minPublished) slugs.push(tag.slug);
+    }
+
+    return slugs;
   }
 
   async findCategoryBySlug(slug: string): Promise<Category | null> {

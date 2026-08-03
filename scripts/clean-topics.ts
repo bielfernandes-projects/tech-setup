@@ -4,6 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
 
+type Topic = { topic: string; category: string; tags: string[] };
+
 config({ path: path.resolve(__dirname, "../.env.local") });
 
 const supabase = createClient(
@@ -32,7 +34,7 @@ async function main() {
 
   const before = topics.length;
   const remaining = topics.filter(
-    (t: any) => !existingSlugs.has(slugify(t.topic))
+    (t: Topic) => !existingSlugs.has(slugify(t.topic))
   );
   const removed = before - remaining.length;
 
@@ -51,7 +53,7 @@ async function main() {
   ];
 
   const uniqueNew = newTopics.filter(
-    (t) => !existingSlugs.has(slugify(t.topic)) && !remaining.some((r: any) => r.topic === t.topic)
+    (t) => !existingSlugs.has(slugify(t.topic)) && !remaining.some((r: Topic) => r.topic === t.topic)
   );
 
   const final = [...remaining, ...uniqueNew];
