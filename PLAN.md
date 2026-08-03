@@ -135,7 +135,7 @@ Plano de remediação em 4 fases antes de pedir nova revisão:
    - /editorial-policy: divulgação honesta de IA assistida, revisão, correções, publicidade
    - Byline: "Published {date}" + link editorial policy; JSON-LD `inLanguage`
 3. **Conteúdo (fase 3)** — ✅ prompts reforçados, topics.json atualizado (28 tópicos válidos)
-4. **Monitoramento (fase 4)** — aguardar tráfego orgânico consistente (GSC) e só então solicitar nova revisão
+4. **Monitoramento (fase 4)** — ✅ deploy `158dde8` + recrawl GSC (03/08/2026). Dono roda geração diária e agenda 1/dia. **Nova revisão AdSense em 04/09/2026**, após ~1 mês de tráfego orgânico.
 
 Decisões consolidadas em voz (dono):
 - Duplicados/similares → despublicar (reversível), não deletar

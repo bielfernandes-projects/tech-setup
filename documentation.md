@@ -301,7 +301,7 @@ Todos em `src/components/`:
 
 - **Status:** Verificado (HTML meta tag no layout.tsx)
 - **Código de verificação:** `MtjK5W3N8G89DsjhL03MlXgaj5lPxmmem9-KeJptP88`
-- **Sitemap:** https://techsetup.site/sitemap.xml (submetido, 169 páginas encontradas)
+- **Sitemap:** https://techsetup.site/sitemap.xml (submetido; recrawl solicitado após remediação — 101 URLs: 60 artigos + 10 categorias + 23 tags + estáticas)
 - **Propriedade:** Prefixo de URL (https://techsetup.site)
 - **Homepage:** Indexada
 
@@ -335,12 +335,14 @@ Todos em `src/components/`:
 - **CSP:** Domínios AdSense autorizados em `next.config.ts` (`pagead2.googlesyndication.com`, `adservice.google.com`, `googleads.g.doubleclick.net`)
 - **Placeholders:** Removidos do layout do artigo — AdSense insere os próprios quando aprovado
 - **Script:** A adicionar após aprovação (via `next/script` `lazyOnload`)
-- **Plano de remediação (em execução):**
-  1. **Dedupe** — remover conteúdo duplicado/similar (23 despublicados)
-  2. **Taxonomia** — consolidar categorias (38→10) e podar tags (167→23)
-  3. **Cadência** — 1 artigo/dia com horário aleatório (frescor real)
-  4. **E-E-A-T honesto** — /about + /editorial-policy sem alucinações de autoridade
-  5. **Revisão** — só pedir nova revisão após tráfego orgânico consistente e todas as fases concluídas
+- **Plano de remediação (concluído):**
+  1. ✅ **Dedupe** — remover conteúdo duplicado/similar (23 despublicados)
+  2. ✅ **Taxonomia** — consolidar categorias (38→10) e podar tags (167→23)
+  3. ✅ **Cadência** — 1 artigo/dia com horário aleatório (frescor real)
+  4. ✅ **E-E-A-T honesto** — /about + /editorial-policy sem alucinações de autoridade
+  5. ✅ **Deploy** — commit `158dde8` (03/08/2026), produção validada
+  6. ✅ **Recrawl GSC** — sitemap re-enviado e páginas-chave reindexadas (dono, 03/08/2026)
+  7. ⏳ **Revisão** — nova revisão será solicitada em **04/09/2026** (após ~1 mês de tráfego orgânico; dono roda o script de geração diariamente e agenda 1/dia até lá)
 
 ### Imagens Externas (next/image)
 
@@ -416,7 +418,9 @@ Pra adicionar domínios: editar `next.config.ts` → `images.remotePatterns`.
 - [x] Fase 2.2 /editorial-policy criado + links no footer/sitemap
 - [x] Fase 2.3 Byline "Published" + link editorial policy + inLanguage no JSON-LD
 - [x] Fase 3.1 Prompts de geração reforçados + topics.json atualizado (28 tópicos, categorias válidas)
-- [ ] Fase 3.2 Rodar geração com novos prompts (quando nova leva for necessária)
-- [ ] Aguardar tráfego orgânico consistente (GSC) antes de nova revisão AdSense
+- [x] Deploy das fases 1–4 — commit `158dde8` (03/08/2026), produção validada
+- [x] Recrawl GSC — sitemap + páginas-chave (dono, 03/08/2026)
+- [ ] Fase 3.2 Rodar geração diária + agendar publicações (dono roda o script todo dia até 04/09/2026)
+- [ ] **04/09/2026** — solicitar nova revisão do AdSense (após ~1 mês de tráfego orgânico)
 - [ ] Adicionar script AdSense (next/script lazyOnload) apos aprovacao
 - [ ] Monitorar tráfego orgânico e indexação no GSC
