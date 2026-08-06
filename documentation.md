@@ -15,7 +15,7 @@
 | Markdown | react-markdown + remark-gfm + rehype-sanitize + rehype-slug | ✅ Ativo |
 | Banco | Supabase PostgreSQL (us-east-1) | ✅ Ativo |
 | Storage | Supabase Storage (hero-images) | ✅ Ativo |
-| CDN/Analytics | Vercel (Auto-deploy + @vercel/analytics) | ✅ Ativo |
+| CDN/Analytics | Vercel (Auto-deploy + @vercel/analytics + @vercel/speed-insights) | ✅ Ativo |
 | Repositório | https://github.com/bielfernandes-projects/tech-setup | ✅ Ativo |
 | Domínio | https://techsetup.site | ✅ Ativo |
 
