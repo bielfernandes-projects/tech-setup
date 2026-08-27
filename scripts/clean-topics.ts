@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import * as fs from "fs";
 import * as path from "path";
+import { VALID_CATEGORIES } from "./content-clusters";
 
 type Topic = { topic: string; category: string; tags: string[] };
 
@@ -38,22 +39,25 @@ async function main() {
   );
   const removed = before - remaining.length;
 
-  // Add new diverse topics
-  const newTopics = [
-    { topic: "Kubernetes for Beginners: Deploy Your First App", category: "DevOps", tags: ["kubernetes", "containers", "devops", "deployment"] },
-    { topic: "TypeScript Generics: A Practical Guide", category: "Software Config", tags: ["typescript", "generics", "javascript", "programming"] },
-    { topic: "PostgreSQL Performance Tuning for Developers", category: "Software Config", tags: ["postgresql", "database", "performance", "sql"] },
-    { topic: "GitHub Actions: Build a CI/CD Pipeline from Scratch", category: "DevOps", tags: ["github-actions", "ci-cd", "automation", "deployment"] },
-    { topic: "Linux Command Line: 50 Essential Commands", category: "Linux", tags: ["linux", "command-line", "terminal", "productivity"] },
-    { topic: "React Server Components: Complete Guide for 2026", category: "Software Config", tags: ["react", "server-components", "nextjs", "frontend"] },
-    { topic: "Nginx Reverse Proxy: Setup and Configuration Guide", category: "DevOps", tags: ["nginx", "reverse-proxy", "web-server", "linux"] },
-    { topic: "Wireshark Network Analysis: Beginner to Intermediate", category: "Software Config", tags: ["wireshark", "networking", "debugging", "security"] },
-    { topic: "Terraform Basics: Infrastructure as Code for Beginners", category: "DevOps", tags: ["terraform", "infrastructure", "cloud", "devops"] },
-    { topic: "WebSocket vs Server-Sent Events: When to Use Each", category: "Software Config", tags: ["websockets", "sse", "real-time", "api"] },
+  // Add new topics focused on the winning clusters (analytics baseline 2026-08-10)
+  const newTopics: Topic[] = [
+    { topic: "Discord voice chat lag on Windows 11: causes and fixes", category: "Troubleshooting", tags: ["discord", "audio", "troubleshooting", "windows-11"] },
+    { topic: "Discord bot can't read messages in a channel: fix permissions", category: "Discord Bots", tags: ["discord", "discordjs", "bots", "troubleshooting"] },
+    { topic: "Use OpenCode to refactor a legacy TypeScript codebase", category: "AI & Development", tags: ["ai", "ai-tools", "cli", "typescript"] },
+    { topic: "Claude Code not reading your repo context? Configure CLAUDE.md", category: "AI & Development", tags: ["ai", "ai-tools", "cli"] },
+    { topic: "Fix WSL2 networking when DNS stops resolving in Ubuntu", category: "Linux", tags: ["wsl2", "ubuntu", "networking", "linux"] },
+    { topic: "Move Docker Desktop data to another drive on Windows 11", category: "Windows Setup", tags: ["docker", "windows-11", "setup"] },
+    { topic: "Run a local LLM with Ollama for private code completion", category: "AI & Development", tags: ["ai", "ollama", "coding", "ai-tools"] },
+    { topic: "Fix 'connection refused' between WSL2 and Windows apps", category: "Linux", tags: ["wsl2", "networking", "linux", "troubleshooting"] },
+    { topic: "Prompt an AI coding agent to write tests that actually pass", category: "AI & Development", tags: ["ai", "ai-tools", "coding"] },
+    { topic: "Automate repetitive Git tasks with shell aliases and hooks", category: "Automation", tags: ["git", "automation", "terminal"] },
   ];
 
   const uniqueNew = newTopics.filter(
-    (t) => !existingSlugs.has(slugify(t.topic)) && !remaining.some((r: Topic) => r.topic === t.topic)
+    (t) =>
+      VALID_CATEGORIES.includes(t.category) &&
+      !existingSlugs.has(slugify(t.topic)) &&
+      !remaining.some((r: Topic) => r.topic === t.topic)
   );
 
   const final = [...remaining, ...uniqueNew];

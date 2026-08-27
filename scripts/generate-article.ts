@@ -17,6 +17,11 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as fs from "fs";
 import * as path from "path";
+import {
+  CONTENT_CLUSTERS,
+  VALID_CATEGORIES,
+  clusterPriority,
+} from "./content-clusters";
 
 config({ path: path.resolve(__dirname, "../.env.local") });
 
@@ -49,9 +54,15 @@ const genAI = new GoogleGenerativeAI(GEMINI_KEY!);
 
 const TOPICS_PATH = path.resolve(__dirname, "topics.json");
 
-const REFILL_PROMPT = `Generate {count} new article topic ideas for "Tech Setup", a niche blog for developers (US/EU).
+function buildRefillPrompt(count: number): string {
+  const clusterLines = CONTENT_CLUSTERS.map(
+    (c, i) => `${i + 1}. ${c.name} — ${c.focus} (topics in: ${c.categories.join(", ")})`,
+  ).join("\n");
 
-Topics should cover: Windows development setup, Node.js tooling, Discord bots, AI coding tools, DevOps, automation (n8n/Make), web3, home automation.
+  return `Generate ${count} new article topic ideas for "Tech Setup", a niche blog for developers (US/EU).
+
+PRODUCE TOPICS PROPORTIONALLY ACROSS THESE CLUSTERS, with more of the earlier ones:
+${clusterLines}
 
 Return ONLY a valid JSON array — no markdown fences, no explanation:
 [
@@ -60,10 +71,11 @@ Return ONLY a valid JSON array — no markdown fences, no explanation:
 
 Rules:
 - Write in English; topics must be specific and answerable (a concrete problem or task), not generic ("The Complete Guide to X").
-- Categories (exact): Troubleshooting, Windows Setup, Discord Bots, AI & Development, Programming, Automation, Web3, DevOps, Linux, Home Automation
+- Categories (exact): ${VALID_CATEGORIES.join(", ")}
 - 3-5 tags per topic
 - Do NOT repeat topics already present in the current topics.json file
 - Avoid topics that would naturally produce a title ending in "A Developer's Guide" or "Ultimate Guide" — prefer question or outcome titles.`;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -239,7 +251,7 @@ Rules:
 
 async function generateTopics(count: number): Promise<number> {
   const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
-  const prompt = REFILL_PROMPT.replace("{count}", String(count));
+  const prompt = buildRefillPrompt(count);
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
@@ -442,7 +454,14 @@ async function main() {
     if (cleaned > 0) console.log(`🧹 Cleaned ${cleaned} orphan topics from topics.json`);
 
     const allTopics = loadTopics();
-    const topics = allTopics.slice(0, limit);
+    const topics = allTopics
+      .map((t, i) => ({ ...t, _order: i }))
+      .sort(
+        (a, b) =>
+          clusterPriority(a.category) - clusterPriority(b.category) ||
+          a._order - b._order,
+      )
+      .slice(0, limit);
     console.log(`🚀 Batch mode: ${topics.length} topics${limit < Infinity ? ` (limited)` : ""}`);
 
     const results: string[] = [];

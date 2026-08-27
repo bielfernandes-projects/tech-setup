@@ -87,3 +87,12 @@ revisão humana, política de correções, publicidade e originalidade. É a
 Motivo da rejeição do AdSense (2026-08-03). Sinal de site "de fábrica": pouco
 conteúdo original, duplicação, cadência artificial, taxonomia poluída. O plano
 de remediação (fases 1–4) ataca exatamente esses sinais.
+
+### Content Cluster
+
+Concentração estratégica de geração e publicação nos nichos que já recebem
+cliques orgânicos (baseline Analytics 2026-08-10): **Discord troubleshooting &
+bots**, **AI development tools** (OpenCode, Claude Code, Cursor, Lovable) e
+**Windows setup & troubleshooting** (WSL2, terminal). Fonte da verdade:
+`scripts/content-clusters.ts`. É o oposto do spray-and-pray da fase de fábrica:
+aprofundar tópicos onde o Google já respondeu, em vez de espalhar por 10 categorias.

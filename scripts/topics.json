@@ -1,144 +1,204 @@
 {
   "topics": [
+    
     {
-      "topic": "Fix black screen after Windows update",
-      "category": "Troubleshooting",
-      "tags": ["windows-11", "troubleshooting", "display", "black-screen"]
+      "topic": "Claude Code not reading your repo context? Configure CLAUDE.md",
+      "category": "AI & Development",
+      "tags": [
+        "ai",
+        "ai-tools",
+        "cli"
+      ]
     },
     {
-      "topic": "Creating a Discord bot that moderates channels automatically",
-      "category": "Discord Bots",
-      "tags": ["discord", "nodejs", "moderation", "bots"]
+      "topic": "Cursor vs Claude Code: which AI coding tool fits your workflow",
+      "category": "AI & Development",
+      "tags": [
+        "ai",
+        "ai-tools",
+        "vibe-coding",
+        "vscode"
+      ]
     },
     {
-      "topic": "How to configure Windows Firewall for Node.js servers",
-      "category": "Windows Setup",
-      "tags": ["windows", "nodejs", "firewall", "networking"]
+      "topic": "Speed up code reviews with AI agents: a practical setup",
+      "category": "AI & Development",
+      "tags": [
+        "ai",
+        "ai-tools",
+        "coding"
+      ]
     },
     {
-      "topic": "Fix Bluetooth audio not working on Windows 11",
-      "category": "Troubleshooting",
-      "tags": ["windows-11", "troubleshooting", "bluetooth", "audio"]
+      "topic": "Stop AI coding tools from rewriting your files: config guardrails",
+      "category": "AI & Development",
+      "tags": [
+        "ai",
+        "ai-tools",
+        "coding"
+      ]
     },
     {
-      "topic": "How to use Supabase with Next.js in 2026",
-      "category": "Programming",
-      "tags": ["supabase", "nextjs", "programming", "authentication"]
+      "topic": "Run a local LLM with Ollama for private code completion",
+      "category": "AI & Development",
+      "tags": [
+        "ai",
+        "ollama",
+        "coding",
+        "ai-tools"
+      ]
     },
     {
-      "topic": "Setting up a monorepo with Turborepo and npm workspaces",
-      "category": "Programming",
-      "tags": ["nodejs", "monorepo", "turborepo", "npm", "programming"]
+      "topic": "Prompt an AI coding agent to write tests that actually pass",
+      "category": "AI & Development",
+      "tags": [
+        "ai",
+        "ai-tools",
+        "coding"
+      ]
     },
     {
-      "topic": "Fix Windows 11 sleep mode waking up randomly",
-      "category": "Troubleshooting",
-      "tags": ["windows-11", "troubleshooting", "sleep-mode", "power"]
+      "topic": "Migrate a project to AI coding agents without breaking CI",
+      "category": "AI & Development",
+      "tags": [
+        "ai",
+        "ai-tools",
+        "cicd",
+        "coding"
+      ]
     },
     {
-      "topic": "How to build a CLI tool with Node.js and Commander.js",
-      "category": "Programming",
-      "tags": ["nodejs", "cli", "commander", "programming"]
+      "topic": "GitHub Copilot suggestions are useless? Tune your workspace context",
+      "category": "AI & Development",
+      "tags": [
+        "ai",
+        "copilot",
+        "coding",
+        "github"
+      ]
     },
+    
+    
     {
-      "topic": "How to set up Nginx as reverse proxy on Windows with WSL2",
-      "category": "Windows Setup",
-      "tags": ["windows", "wsl2", "nginx", "reverse-proxy"]
-    },
-    {
-      "topic": "Fix Git merge conflicts in VS Code — step by step",
-      "category": "Troubleshooting",
-      "tags": ["git", "vscode", "merge-conflicts", "troubleshooting"]
-    },
-    {
-      "topic": "How to use environment variables in Node.js properly",
-      "category": "Programming",
-      "tags": ["nodejs", "environment-variables", "dotenv", "programming"]
-    },
-    {
-      "topic": "Setting up GitHub Actions CI/CD for a Next.js project",
-      "category": "DevOps",
-      "tags": ["github-actions", "ci/cd", "nextjs", "devops"]
-    },
-    {
-      "topic": "Fix audio crackling on Windows 11 with multiple audio devices",
-      "category": "Troubleshooting",
-      "tags": ["windows-11", "troubleshooting", "audio", "devices"]
-    },
-    {
-      "topic": "Optimizing WSL2 Performance for Large-Scale Node.js Monorepos",
-      "category": "Windows Setup",
-      "tags": ["wsl2", "windows", "nodejs", "performance", "monorepo"]
-    },
-    {
-      "topic": "Securing Your Discord Bot: Best Practices for API Key and Environment Variable Management",
-      "category": "Discord Bots",
-      "tags": ["discord", "bots", "security", "environment-variables"]
-    },
-    {
-      "topic": "Automating Discord Server Moderation with Custom Node.js Webhooks",
-      "category": "Discord Bots",
-      "tags": ["discord", "nodejs", "webhooks", "moderation"]
-    },
-    {
-      "topic": "Fixing 'Discord Gateway Intents' Errors in Node.js Development",
-      "category": "Discord Bots",
-      "tags": ["discord", "nodejs", "gateway-intents", "troubleshooting"]
-    },
-    {
-      "topic": "Hardening a Windows-Based Dedicated Game Server: Network Configuration and Resource Limits",
-      "category": "Windows Setup",
-      "tags": ["windows", "game-server", "networking", "security"]
-    },
-    {
-      "topic": "Kubernetes for Beginners: Deploy Your First App",
-      "category": "DevOps",
-      "tags": ["kubernetes", "devops", "deployment", "containers"]
-    },
-    {
-      "topic": "TypeScript Generics: A Practical Guide",
-      "category": "Programming",
-      "tags": ["typescript", "generics", "programming"]
-    },
-    {
-      "topic": "PostgreSQL Performance Tuning for Developers",
-      "category": "Programming",
-      "tags": ["postgresql", "performance", "database", "programming"]
-    },
-    {
-      "topic": "GitHub Actions: Build a CI/CD Pipeline from Scratch",
-      "category": "DevOps",
-      "tags": ["github-actions", "ci/cd", "devops"]
-    },
-    {
-      "topic": "Linux Command Line: 50 Essential Commands",
+      "topic": "WSL2 out of memory? Set a .wslconfig memory limit",
       "category": "Linux",
-      "tags": ["linux", "cli", "terminal", "commands"]
+      "tags": [
+        "wsl2",
+        "linux",
+        "performance",
+        "configuration"
+      ]
     },
     {
-      "topic": "React Server Components: Complete Guide for 2026",
-      "category": "Programming",
-      "tags": ["react", "server-components", "nextjs", "programming"]
+      "topic": "Fix Windows 11 slow boot caused by dev services",
+      "category": "Troubleshooting",
+      "tags": [
+        "windows-11",
+        "performance",
+        "troubleshooting"
+      ]
     },
     {
-      "topic": "Nginx Reverse Proxy: Setup and Configuration Guide",
+      "topic": "Git Bash vs WSL vs PowerShell: pick the right shell for the job",
+      "category": "Windows Setup",
+      "tags": [
+        "windows",
+        "terminal",
+        "powershell",
+        "wsl2",
+        "setup"
+      ]
+    },
+    {
+      "topic": "Fix 'connection refused' between WSL2 and Windows apps",
+      "category": "Linux",
+      "tags": [
+        "wsl2",
+        "networking",
+        "linux",
+        "troubleshooting"
+      ]
+    },
+    {
+      "topic": "Set up a clean Ubuntu WSL environment for Node.js development",
+      "category": "Linux",
+      "tags": [
+        "wsl2",
+        "ubuntu",
+        "nodejs",
+        "setup"
+      ]
+    },
+    {
+      "topic": "Run multiple WSL distros side by side without conflicts",
+      "category": "Linux",
+      "tags": [
+        "wsl2",
+        "linux",
+        "setup"
+      ]
+    },
+    {
+      "topic": "Windows Search indexing slowing you down: disable and re-enable",
+      "category": "Troubleshooting",
+      "tags": [
+        "windows",
+        "performance",
+        "troubleshooting"
+      ]
+    },
+    
+    
+    {
+      "topic": "Self-host Home Assistant in Docker: first-weekend setup",
+      "category": "Home Automation",
+      "tags": [
+        "docker",
+        "home-assistant",
+        "automation"
+      ]
+    },
+    {
+      "topic": "Why your GitHub Actions run fails locally but passes in CI",
       "category": "DevOps",
-      "tags": ["nginx", "reverse-proxy", "devops", "configuration"]
+      "tags": [
+        "github-actions",
+        "cicd",
+        "debugging",
+        "devops"
+      ]
+    },
+    
+    
+    {
+      "topic": "Configuring Claude Code and Cursor for Concurrent Multi-File Refactoring in Large Repositories",
+      "category": "AI & Development",
+      "tags": [
+        "claude-code",
+        "cursor",
+        "ai-coding",
+        "refactoring"
+      ]
     },
     {
-      "topic": "Wireshark Network Analysis: Beginner to Intermediate",
-      "category": "DevOps",
-      "tags": ["wireshark", "networking", "analysis", "devops"]
+      "topic": "Fixing WSL2 DNS Resolution Failures and VPN Routing Drops on Corporate Windows 11 Laptops",
+      "category": "Windows Setup",
+      "tags": [
+        "wsl2",
+        "windows-11",
+        "networking",
+        "troubleshooting"
+      ]
     },
     {
-      "topic": "Terraform Basics: Infrastructure as Code for Beginners",
-      "category": "DevOps",
-      "tags": ["terraform", "infrastructure-as-code", "devops", "aws"]
-    },
-    {
-      "topic": "WebSocket vs Server-Sent Events: When to Use Each",
-      "category": "Programming",
-      "tags": ["websocket", "server-sent-events", "programming", "real-time"]
+      "topic": "Automating Local HTTPS Certificate Generation for Vite and Next.js Dev Servers Using mkcert",
+      "category": "Automation",
+      "tags": [
+        "ssl",
+        "vite",
+        "nextjs",
+        "automation"
+      ]
     }
   ]
 }

@@ -4,7 +4,8 @@
  *
  * One-off: re-flows every currently scheduled article onto one per calendar
  * day starting tomorrow, each at a randomized time of day (06:00–22:59 UTC).
- * Order of existing scheduled articles is preserved.
+ * Order is re-ranked by cluster priority (what gets clicks publishes first),
+ * then by original scheduled date within the same cluster.
  *
  * Usage:
  *   npx tsx scripts/reschedule-scheduled.ts          # dry run (report only)
@@ -14,11 +15,12 @@
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import * as path from "path";
+import { clusterPriorityOf } from "./content-clusters";
 
 config({ path: path.resolve(__dirname, "../.env.local") });
 
 const supabase = createClient(
-  process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
@@ -45,14 +47,19 @@ async function main() {
 
   const { data: scheduled, error } = await supabase
     .from("articles")
-    .select("id, title, slug, published_at")
+    .select("id, title, slug, published_at, categories(slug)")
     .eq("status", "scheduled")
     .not("published_at", "is", null)
     .order("published_at", { ascending: true });
 
   if (error) throw new Error(`Failed to fetch scheduled articles: ${error.message}`);
 
-  const rows = scheduled ?? [];
+  const rows = (scheduled ?? []).sort((a, b) => {
+    const pa = clusterPriorityOf(a.categories);
+    const pb = clusterPriorityOf(b.categories);
+    if (pa !== pb) return pa - pb;
+    return new Date(a.published_at).getTime() - new Date(b.published_at).getTime();
+  });
   console.log(`📅 Scheduled articles: ${rows.length}\n`);
 
   if (rows.length === 0) {

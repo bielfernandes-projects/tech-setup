@@ -15,10 +15,11 @@
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import * as path from "path";
+import { clusterPriorityOf } from "./content-clusters";
 
 config({ path: path.resolve(__dirname, "../.env.local") });
 
-const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
@@ -75,10 +76,12 @@ function addDays(date: Date, days: number): Date {
 async function main() {
   if (dryRun) console.log("🔍 DRY RUN — no changes will be made\n");
 
-  // 1. Find candidate articles (draft/in_review, with hero image)
+  // 1. Find candidate articles (draft/in_review, with hero image),
+  //    prioritized by content cluster (what analytics says gets clicks),
+  //    then oldest first within the same priority.
   const { data: candidates, error: candErr } = await supabase
     .from("articles")
-    .select("id, title, slug, hero_image_url, created_at, status")
+    .select("id, title, slug, hero_image_url, created_at, status, categories(slug)")
     .in("status", ["draft", "in_review"])
     .not("hero_image_url", "is", null)
     .neq("hero_image_url", "")
@@ -86,7 +89,11 @@ async function main() {
 
   if (candErr) throw new Error(`Failed to fetch candidates: ${candErr.message}`);
 
-  const available = candidates ?? [];
+  const available = (candidates ?? []).sort((a, b) => {
+    const pa = clusterPriorityOf(a.categories);
+    const pb = clusterPriorityOf(b.categories);
+    return pa - pb;
+  });
   console.log(`📋 Candidates with hero image: ${available.length}`);
 
   if (available.length === 0) {

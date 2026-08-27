@@ -143,6 +143,21 @@ Decisões consolidadas em voz (dono):
 - Cadência de 1 artigo/dia
 - `documentation.md` é a fonte da verdade e deve ser atualizada a cada mudança
 
+## Estratégia de Clusters (2026-08-10 — baseline de Analytics)
+
+Baseline Vercel Analytics (20/07–10/08): só 6 páginas recebem cliques orgânicos, e
+todas são de **Discord troubleshooting**, **AI dev tools** e **Windows setup (WSL2)**.
+Decisão: concentrar geração e agendamento nesses clusters (detalhes em `scripts/content-clusters.ts`):
+
+| # | Cluster | Peso | Categorias |
+|---|---------|------|-----------|
+| 1 | Discord troubleshooting & bots | 40% | Discord Bots, Troubleshooting |
+| 2 | AI development tools | 30% | AI & Development |
+| 3 | Windows setup & troubleshooting | 20% | Windows Setup, Troubleshooting, Linux |
+| 4 | Core development (fill) | 10% | Programming, Automation, DevOps, Web3, Home Automation |
+
+Meta antes da reaplicação do AdSense (04/09/2026): ≥30 sessões orgânicas/semana + ≥15 páginas com cliques no GSC.
+
 ## Pendências (a resolver na execução)
 
 - [x] Registro do domínio (techsetup.site)

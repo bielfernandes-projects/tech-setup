@@ -158,7 +158,8 @@ scripts/
 ├── consolidate-categories.ts# Merge de categorias duplicadas
 ├── split-software-config.ts # Split da categoria "Software Config" removida
 ├── prune-tags.ts            # Poda de tags com <3 artigos publicados
-├── reschedule-scheduled.ts  # Reagenda 1/dia preservando ordem
+├── reschedule-scheduled.ts  # Reagenda 1/dia por prioridade de cluster
+├── content-clusters.ts      # Estratégia de clusters (fonte da verdade de prioridade)
 ├── gem-instruction.md       # Instrução GEM
 └── topics.json              # Pool de tópicos para geração
 ```
@@ -205,6 +206,12 @@ Todos em `src/components/`:
 - **Uso refill:** `npx tsx scripts/generate-article.ts --refill N` (gera novos tópicos no topics.json)
 - **Uso batch+refill:** `npx tsx scripts/generate-article.ts --batch --limit 10 --refill 5`
 - **Fluxo:** Gemini gera Markdown (2 chamadas: meta + content) → Unsplash busca hero → Supabase Storage → DB como draft
+- **Cluster strategy (2026-08-10):** tópicos são gerados proporcionalmente por cluster, priorizando o que clica no Google. Definições em `scripts/content-clusters.ts`:
+  1. **Discord troubleshooting & bots** (40%) — `Discord Bots` + `Troubleshooting`
+  2. **AI development tools** (30%) — `AI & Development` (OpenCode, Claude Code, Cursor, Lovable, Codex, Copilot)
+  3. **Windows setup & troubleshooting** (20%) — `Windows Setup` + `Troubleshooting` + `Linux` (WSL2, terminal)
+  4. **Core development (fill)** (10%) — demais categorias
+- **Batch priorizado:** `--batch` processa os tópicos na ordem de cluster (prioritários primeiro), mantendo ordem relativa dentro do mesmo cluster
 - **Hero image obrigatória:** falha no Unsplash (com fallback de queries: tópico → categoria → "developer workspace technology") aborta o artigo — nunca salva draft sem imagem
 - **Auto-consumo:** Tópicos são removidos do topics.json após uso bem-sucedido
 - **Auto-refill:** `--refill N` gera novos tópicos via Gemini ao final do batch
@@ -228,7 +235,9 @@ Todos em `src/components/`:
 - **Dry run:** `npx tsx scripts/schedule-articles.ts --dry-run`
 - **Count:** `npx tsx scripts/schedule-articles.ts --count 1`
 - **Fluxo:** Seleciona drafts com hero image → agenda **1/dia** (`MAX_PER_DAY=1`) com **horário aleatório 06:00–22:59 UTC** → preenche dias com <1 antes de partir pro próximo
-- **Regras:** Só agenda artigos com `hero_image_url`, ordena por `created_at` ASC (mais antigos primeiro). Cadência de 1 artigo/dia decidida pelo dono pós-rejeição AdSense (sinal de frescor/editorial).
+- **Prioridade por cluster:** candidatos são ordenados pela estratégia de clusters (`scripts/content-clusters.ts` → `CATEGORY_SLUG_PRIORITY`) — drafts de Discord, AI tools e Windows/WSL2 são agendados antes; dentro do mesmo cluster, os mais antigos primeiro. Decisão baseada no baseline de Analytics de 2026-08-10
+- **Regras:** Só agenda artigos com `hero_image_url`. Cadência de 1 artigo/dia decidida pelo dono pós-rejeição AdSense (sinal de frescor/editorial).
+- **Fix 2026-08-27:** scripts locais (`schedule-articles.ts`, `reschedule-scheduled.ts`) agora usam `NEXT_PUBLIC_SUPABASE_URL` direto (antes preferiam `SUPABASE_URL`, que pode conflitar com env global de outra máquina e gerar `Invalid API key`).
 
 ### Dedupe de Artigos (pós-rejeição AdSense)
 
@@ -259,7 +268,8 @@ Todos em `src/components/`:
 
 - **Local:** `scripts/reschedule-scheduled.ts`
 - **Uso:** `npx tsx scripts/reschedule-scheduled.ts --apply`
-- **Fluxo:** Reagenda todos os `scheduled` para 1/dia preservando a ordem original. 22 agendados reajustados (06:00–22:59 UTC).
+- **Fluxo:** Reagenda todos os `scheduled` para 1/dia (06:00–22:59 UTC) reordenando por **prioridade de cluster** (o que clica no Google publica antes — `scripts/content-clusters.ts`), desempatando pela data original dentro do mesmo cluster
+- **Resultado:** 92 → 68 agendados após dedupe; fila reordenada 11/08 → 17/10 (11 discord-bots + 17 troubleshooting primeiro)
 
 ### Verificação do Banco
 
@@ -271,7 +281,7 @@ Todos em `src/components/`:
 
 - **Local:** `scripts/clean-topics.ts`
 - **Uso:** `npx tsx scripts/clean-topics.ts`
-- **Fluxo:** Remove tópicos já usados no DB, adiciona novos tópicos diversos
+- **Fluxo:** Remove tópicos já usados no DB; adiciona novos tópicos focados nos clusters prioritários (validados por categoria via `scripts/content-clusters.ts`)
 
 ## Variáveis de Entorno
 
@@ -285,7 +295,7 @@ Todos em `src/components/`:
 | `NEXT_PUBLIC_SITE_URL` | Vercel (opcional) | URL canônica do site; fallback é `https://techsetup.site` |
 | `GEMINI_API_KEY` | local only | Geração de artigos |
 | `UNSPLASH_ACCESS_KEY` | local only | Busca de hero images |
-| `SUPABASE_URL` | local only | Alias para `NEXT_PUBLIC_SUPABASE_URL` nos scripts |
+| `SUPABASE_URL` | — | Não usado; scripts locais usam `NEXT_PUBLIC_SUPABASE_URL` (fix 2026-08-27: evitar conflito com `SUPABASE_URL` global de outra máquina) |
 
 ## Clientes CLI
 
@@ -357,6 +367,37 @@ Domínios autorizados em `next.config.ts`:
 
 Pra adicionar domínios: editar `next.config.ts` → `images.remotePatterns`.
 
+## Analytics & Tráfego
+
+> Fonte: Vercel Web Analytics (via API `/v1/query/web-analytics`). Baseline 2026-07-20 → 2026-08-10.
+
+### Números-chave
+
+| Métrica | Valor |
+|---------|-------|
+| Visitantes únicos | 123 |
+| Pageviews | 381 (3,1 PV/visitante) |
+| Média diária | ~5,6 visitantes (em queda) |
+| Orgânico (referrer `google.com`) | 17 visitantes / 20 PV (~14% do total) |
+| Direto (referrer vazio) | 106 visitantes (~86%) — inclui tráfego do dono e referrer-stripping do Google |
+| Páginas com clique do Google | 6 (de ~66 publicadas) |
+| Top orgânico | Discord audio echo (7 vis) > OpenCode CLI (3) > Claude Code, Lovable+Vercel, WSL2 (2 cada) |
+| Países orgânicos | US, CA, DE, NL, GR, FR, GB, JP — Tier-1 ✅ |
+| Orgânico por dispositivo | 82% desktop / 18% mobile |
+
+### Leitura (o que os dados dizem)
+
+- **O blog ainda não tem vida orgânica** — 3 semanas de domínio novo, sem backlinks, indexação engatinhando. O pico de 16–18 vis/dia (24–27/07) era atividade do dono durante a fase de fábrica; o "declínio" posterior é o ruído próprio cessando, não desindexação.
+- **Clusters validados por cliques reais:** Discord troubleshooting (echo), AI dev tools (OpenCode, Claude Code, Lovable), Windows setup (WSL2). É neles que a geração e o agendamento agora se concentram (`scripts/content-clusters.ts`).
+- **Formato que converte:** "how to fix X on Windows 11" + guia passo a passo + ano no título. Público Tier-1, desktop, dev.
+- **Atenção ao dado:** Vercel subestima orgânico (Google remove referrer em parte do tráfego); GSC é a fonte da verdade para orgânico.
+
+### Metas antes da reaplicação do AdSense (04/09/2026)
+
+- [ ] ≥30 sessões orgânicas/semana sustentadas (referrer `google.com`)
+- [ ] ≥15 páginas distintas com cliques no GSC
+- [ ] Páginas-chave (Discord audio echo + cluster) indexadas e recebendo cliques consistentes
+
 ## Segurança
 
 ### Autenticação de API
@@ -420,7 +461,9 @@ Pra adicionar domínios: editar `next.config.ts` → `images.remotePatterns`.
 - [x] Fase 3.1 Prompts de geração reforçados + topics.json atualizado (28 tópicos, categorias válidas)
 - [x] Deploy das fases 1–4 — commit `158dde8` (03/08/2026), produção validada
 - [x] Recrawl GSC — sitemap + páginas-chave (dono, 03/08/2026)
+- [x] Baseline de Analytics documentado (2026-08-10 — Vercel Web Analytics API)
+- [x] Cluster strategy implementada (2026-08-10) — `scripts/content-clusters.ts`; geração (batch/refill) e agendamento priorizam Discord, AI tools e Windows/WSL2
 - [ ] Fase 3.2 Rodar geração diária + agendar publicações (dono roda o script todo dia até 04/09/2026)
 - [ ] **04/09/2026** — solicitar nova revisão do AdSense (após ~1 mês de tráfego orgânico)
 - [ ] Adicionar script AdSense (next/script lazyOnload) apos aprovacao
-- [ ] Monitorar tráfego orgânico e indexação no GSC
+- [ ] Monitorar tráfego orgânico e indexação no GSC (metas na seção Analytics & Tráfego)
