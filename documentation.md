@@ -398,6 +398,19 @@ Pra adicionar domínios: editar `next.config.ts` → `images.remotePatterns`.
 - [ ] ≥15 páginas distintas com cliques no GSC
 - [ ] Páginas-chave (Discord audio echo + cluster) indexadas e recebendo cliques consistentes
 
+### Diagnóstico GSC (2026-10-20)
+
+- **Indexação:** 5 indexadas / 142 não indexadas (84 "Detectada, mas não indexada", 55 "Rastreada, mas não indexada", 2 × 404, 1 cópia sem canônica). O gargalo é indexação/autoridade, **não volume** — publicar mais não resolve.
+- **Desempenho (3 meses):** 2 cliques / 555 impressões; pico em 25–27/07, quase zero desde 04/08. Posição média 30–50.
+- **Fila:** 136 published, 5 scheduled (último 24/10), 24 draft, 20 tópicos em `topics.json`. **Os 24 drafts são todos duplicados despublicados pelo dedupe — NÃO agendar** (reintroduz o sinal de baixo valor do AdSense). `schedule-articles.ts` os escolhe por padrão; só rodar após gerar drafts novos.
+- **404 de duplicados:** URLs despublicadas (ex.: `windows-terminal-ultimate-power-user-guide`, `how-to-fix-discord-audio-echo-developers-diagnostic-guide`) tinham impressões e davam 404. Adicionados 301 em `next.config.ts` (`dedupedToCanonical`, 22 redirects → canônico publicado).
+- **`scripts/optimize-seo.ts`:** reescreve title/excerpt de 7 artigos com impressões (alinhado às queries do GSC) e adiciona seção "Related guides" (links internos por cluster em 37 artigos). Dry-run por padrão, `--apply` escreve no banco. **Status: aplicado em 2026-10-20** (idempotente) + `/api/revalidate` nos 37 slugs.
+- **Indexação solicitada** no GSC (2026-10-20) para os 7 artigos reescritos. Cota do GSC ≈10/dia.
+- **Domínio duplicado:** `tech-setup.vercel.app` servia o site inteiro (canonical correto, mas duplicado). Adicionado 308 → `techsetup.site` em `next.config.ts`.
+- **Sitemap:** ok (126 páginas, processado em 19/10).
+- **AdSense:** nova revisão em andamento ("Preparando", informado pelo dono em 2026-10-20).
+- **Decisão:** pausar geração de artigos novos até a indexação melhorar (5/147). Foco em links externos — veja `docs/distribuicao.md`. A fila agendada (5 artigos) termina em 24/10.
+
 ## Segurança
 
 ### Autenticação de API
